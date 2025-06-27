@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogPanel,
@@ -13,13 +13,30 @@ import {
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
 import { NavLink } from 'react-router-dom'
-
+import socket from '../socket';
 
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+    const [message, setMessage] = useState('');
+    const [chat, setChat] = useState([]);
+
+    useEffect(() => {
+        socket.on('receive_message', (data) => {
+            setChat(prev => [...prev, data]);
+        });
+
+        return () => socket.off('receive_message');
+    }, []);
+
+    const sendMessage = () => {
+        socket.emit('send_message', { message });
+        setMessage('');
+    };
+
   return (
+        <>
     <header className="bg-gray-50">
       <nav aria-label="Global" className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
         <div className="flex lg:flex-1">
@@ -115,5 +132,24 @@ export default function Home() {
       </Dialog>
       
     </header>
+
+     <div className="p-8 max-w-md mx-auto">
+            <h1 className="text-2xl font-bold mb-4">Chat App</h1>
+            <div className="border p-4 h-64 overflow-y-scroll bg-gray-100 mb-4">
+                {chat.map((m, i) => <div key={i}>{m.message}</div>)}
+            </div>
+            <div className="flex gap-2">
+                <input
+                    className="border flex-1 p-2"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Type a message"
+                />
+                <button className="bg-blue-500 text-white px-4 py-2" onClick={sendMessage}>
+                    Send
+                </button>
+            </div>
+        </div>
+    </>
   )
 }
