@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
 import socket from '../../socket';
+
 export default function Index({ user, setUser }) {
     const token = localStorage.getItem('token');
 
@@ -45,13 +46,7 @@ export default function Index({ user, setUser }) {
     const [message, setMessage] = useState('');
     const [chat, setChat] = useState([]);
 
-    useEffect(() => {
-        socket.on('receive_message', (data) => {
-            setChat(prev => [...prev, data]);
-        });
-
-        return () => socket.off('receive_message');
-    }, []);
+   
 
     const sendMessage = async () => {
         // socket.emit('send_message', { message });
@@ -94,6 +89,22 @@ export default function Index({ user, setUser }) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [chats]);
+
+
+  
+  
+
+  useEffect(() => {
+    // Listen for incoming messages
+    socket.on('receive_message', (message) => {
+      setChats((prevChats) => [...prevChats, message]);
+    });
+
+    // Optional: cleanup listener when component unmounts
+    return () => {
+      socket.off('receive_message');
+    };
+  }, []);
     return (
         <div className="bg-gray-50 m-4 rounded-lg  h-[80vh] flex flex-col justify-between">
 
