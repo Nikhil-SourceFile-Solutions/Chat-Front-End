@@ -12,7 +12,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import socket from '../socket';
 import axios from 'axios'
 
@@ -21,9 +21,16 @@ import { UserList } from './UserList'
 import MessageBox from './MessageBox'
 export default function Home() {
 
+ const navigate=useNavigate();
+
+ const token = localStorage.getItem('token');
+
+ useEffect(()=>{
+if(!token)navigate('/login')
+ },[token])
   const [users,setUsers]=useState([]);
   const [selectedUser,setSelectedUser]=useState(null);
-  const token = localStorage.getItem('token');
+  
   const fetchData = async () => {
     
     try {
@@ -86,13 +93,12 @@ export default function Home() {
 
           </PopoverGroup>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <NavLink to="/login" className="text-sm/6 font-semibold  me-4">
-              Login
-            </NavLink>
-
-            <NavLink to="/register" className="text-sm/6 font-semibold  ">
-              Register
-            </NavLink>
+            <button type='button' onClick={()=>{
+              localStorage.removeItem("token");
+              navigate('/login')
+            }} className="text-sm/6 font-semibold  bg-[#ff0000] px-3 rounded-lg me-4">
+              Logout
+            </button>
           </div>
         </nav>
         <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="lg:hidden">
@@ -175,11 +181,11 @@ export default function Home() {
           selectedUser ? 'hidden md:block' : 'block'
         }`}
       >
-        <div className="p-3.5 font-bold text-lg ">Chats</div>
+        <div className="p-4 font-bold text-lg ">Chats</div>
         <ul>
           {users.map((user) => (
             <li
-              key={user.id}
+              key={user._id}
               className=" cursor-pointer hover:bg-gray-200"
               onClick={() => setSelectedUser(user)}
             >

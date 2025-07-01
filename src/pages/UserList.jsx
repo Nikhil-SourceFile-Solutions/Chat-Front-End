@@ -1,6 +1,37 @@
 import { Users, Image as ImageIcon } from 'lucide-react'; // or use your own icons
-
+import { useEffect } from 'react';
+import socket from '../socket';
+import { useState } from 'react';
 export const UserList = ({ user,selectedUser }) => {
+
+  const [isTyping, setIsTyping] = useState(false);
+ const storedUser = localStorage.getItem('user');
+const authUser = storedUser ? JSON.parse(storedUser)?._id : null;
+
+  console.log("authUser",authUser)
+  
+ useEffect(() => {
+  const handleTyping = ({ fromselectedUserId }) => {
+    if (fromselectedUserId === user._id) {
+      setIsTyping(true);
+    }
+  };
+
+  const handleStopTyping = ({ fromselectedUserId }) => {
+    if (fromselectedUserId === user._id) {
+      setIsTyping(false);
+    }
+  };
+
+  socket.on('typing', handleTyping);
+  socket.on('stop_typing', handleStopTyping);
+
+  return () => {
+    socket.off('typing', handleTyping);
+    socket.off('stop_typing', handleStopTyping);
+  };
+}, [user._id]);
+
   return (
     <div className={`flex items-center justify-between px-3 py-3 hover:bg-gray-700 cursor-pointer  ${selectedUser?._id==user?._id?'bg-[#020621]':''}`}>
       {/* Left: Avatar & Details */}
@@ -12,10 +43,10 @@ export const UserList = ({ user,selectedUser }) => {
 
         {/* Name & Message Info */}
         <div>
-          <div className="text-white font-semibold text-sm">{user?.name}</div>
+          <div className="text-white font-semibold text-sm">{user?.name} {authUser==user?._id && ('(You)')}</div>
           <div className="text-gray-400 text-xs flex items-center gap-1">
-         
-           Test message
+         {isTyping?'typing...':'Test message'}
+           
           </div>
         </div>
       </div>
