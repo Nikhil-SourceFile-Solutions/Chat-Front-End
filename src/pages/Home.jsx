@@ -17,6 +17,8 @@ import socket from '../socket';
 import axios from 'axios'
 
 import Chat from './chat/Index'
+import { UserList } from './UserList'
+import MessageBox from './MessageBox'
 export default function Home() {
 
   const [users,setUsers]=useState([]);
@@ -27,7 +29,7 @@ export default function Home() {
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://localhost:5000/api/home-data',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/home-data',
         headers: {
           'Content-Type': 'application/json',
           Authorization: "Bearer " + token,
@@ -49,9 +51,11 @@ export default function Home() {
 
 
 
+
+
   return (
     <>
-      <header className="bg-gray-50">
+      <header className="bg-[#020621] text-white">
         <nav aria-label="Global" className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
           <div className="flex lg:flex-1">
             <a href="#" className="-m-1.5 p-1.5">
@@ -67,7 +71,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 "
             >
               <span className="sr-only">Open main menu</span>
               <Bars3Icon aria-hidden="true" className="size-6" />
@@ -76,17 +80,17 @@ export default function Home() {
           <PopoverGroup className="hidden lg:flex lg:gap-x-12">
 
 
-            <NavLink to="/" className="text-sm/6 font-semibold text-gray-900">
+            <NavLink to="/" className="text-sm/6 font-semibold ">
               Chat Home
             </NavLink>
 
           </PopoverGroup>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <NavLink to="/login" className="text-sm/6 font-semibold text-gray-900 me-4">
+            <NavLink to="/login" className="text-sm/6 font-semibold  me-4">
               Login
             </NavLink>
 
-            <NavLink to="/register" className="text-sm/6 font-semibold text-gray-900 ">
+            <NavLink to="/register" className="text-sm/6 font-semibold  ">
               Register
             </NavLink>
           </div>
@@ -147,8 +151,8 @@ export default function Home() {
 
       </header>
 
-   <div className="flex">
-  {/* Left section – max width 350px */}
+   {/* <div className="flex">
+
   <div className="w-full max-w-[350px] overflow-y-auto border-r border-gray-200">
     {users?.map((user) => (
       <div key={user._id} className={` ${selectedUser?._id==user._id?'bg-[#a0eaa1]':'bg-gray-50'}  p-2 m-4 rounded-lg shadow-sm`} onClick={()=>setSelectedUser(user)}>
@@ -158,13 +162,51 @@ export default function Home() {
     ))}
   </div>
 
-  {/* Right section – takes the rest of the space */}
+
   <div className="flex-1 p-4">
     <Chat user={selectedUser} setUser={setSelectedUser}/>
   </div>
-</div>
+</div> */}
 
-     
+      <div className="h-[80vh] text-white bg-[#1a0529] w-full flex flex-col md:flex-row ">
+      {/* Sidebar - Chat List */}
+      <div
+        className={`  md:w-[350px] w-full md:block  border-r border-[#000000] ${
+          selectedUser ? 'hidden md:block' : 'block'
+        }`}
+      >
+        <div className="p-3.5 font-bold text-lg ">Chats</div>
+        <ul>
+          {users.map((user) => (
+            <li
+              key={user.id}
+              className=" cursor-pointer hover:bg-gray-200"
+              onClick={() => setSelectedUser(user)}
+            >
+              {/* {user.name} */}
+              <UserList user={user} selectedUser={selectedUser}/>
+            </li>
+          ))}
+        </ul>
+
+        
+      </div>
+
+      {/* Main - Chat Content */}
+      <div
+        className={`flex-1 md:block bg-[#020621] ${
+          selectedUser ? 'block' : 'hidden md:block'
+        }`}
+      >
+        {selectedUser ? (
+          <MessageBox selectedUser={selectedUser} setSelectedUser={setSelectedUser}/>
+        ) : (
+          <div className="h-full flex items-center justify-center text-gray-400">
+            Select a chat to start messaging
+          </div>
+        )}
+      </div>
+    </div>
     </>
   )
 }

@@ -41,10 +41,21 @@ export default function Index({ user, setUser }) {
         if (user?._id) fetchChat()
     }, [user?._id])
 
+
+
     const [message, setMessage] = useState('');
+    const [chat, setChat] = useState([]);
+
+   
 
     const sendMessage = async () => {
+        // socket.emit('send_message', { message });
+        // setMessage('');
+
+        // 
+
         if(!message) return;
+
         try {
             const response = await axios({
                 method: 'post',
@@ -81,10 +92,14 @@ export default function Index({ user, setUser }) {
 
 
 
+
+  
+  
+
   useEffect(() => {
    
     socket.on('receive_message', (message) => {
-      
+       setIsTyping(false);
       setChats((prevChats) => [...prevChats, message]);
 
       const sound = new Audio('/assets/incoming.mp3');

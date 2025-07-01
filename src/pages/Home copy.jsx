@@ -16,22 +16,25 @@ import { NavLink } from 'react-router-dom'
 import socket from '../socket';
 import axios from 'axios'
 
-
+import Chat from './chat/Index'
 export default function Home() {
 
+  const [users,setUsers]=useState([]);
+  const [selectedUser,setSelectedUser]=useState(null);
   const token = localStorage.getItem('token');
   const fetchData = async () => {
-  
+    
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://localhost:5000/api/home-data',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/home-data',
         headers: {
           'Content-Type': 'application/json',
           Authorization: "Bearer " + token,
         },
       });
 
+      if(response.data.status=="success")setUsers(response.data.users)
       console.log(response)
     } catch (error) {
       console.log(error)
@@ -44,21 +47,7 @@ export default function Home() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const [message, setMessage] = useState('');
-  const [chat, setChat] = useState([]);
 
-  useEffect(() => {
-    socket.on('receive_message', (data) => {
-      setChat(prev => [...prev, data]);
-    });
-
-    return () => socket.off('receive_message');
-  }, []);
-
-  const sendMessage = () => {
-    socket.emit('send_message', { message });
-    setMessage('');
-  };
 
   return (
     <>
@@ -158,23 +147,24 @@ export default function Home() {
 
       </header>
 
-      <div className="p-8 max-w-md mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Chat App</h1>
-        <div className="border p-4 h-64 overflow-y-scroll bg-gray-100 mb-4">
-          {chat.map((m, i) => <div key={i}>{m.message}</div>)}
-        </div>
-        <div className="flex gap-2">
-          <input
-            className="border flex-1 p-2"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type a message"
-          />
-          <button className="bg-blue-500 text-white px-4 py-2" onClick={sendMessage}>
-            Send
-          </button>
-        </div>
+   <div className="flex">
+  {/* Left section – max width 350px */}
+  <div className="w-full max-w-[350px] overflow-y-auto border-r border-gray-200">
+    {users?.map((user) => (
+      <div key={user._id} className={` ${selectedUser?._id==user._id?'bg-[#a0eaa1]':'bg-gray-50'}  p-2 m-4 rounded-lg shadow-sm`} onClick={()=>setSelectedUser(user)}>
+        <b>{user.name}</b> <br />
+        <small>{user.phone}</small>
       </div>
+    ))}
+  </div>
+
+  {/* Right section – takes the rest of the space */}
+  <div className="flex-1 p-4">
+    <Chat user={selectedUser} setUser={setSelectedUser}/>
+  </div>
+</div>
+
+     
     </>
   )
 }
