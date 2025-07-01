@@ -16,7 +16,7 @@ export default function MessageBox({ selectedUser, setSelectedUser }) {
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/chat-data',
+        url: 'http://localhost:5000/api/chat-data',
         params: { _id: selectedUser?._id },
         headers: {
           'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export default function MessageBox({ selectedUser, setSelectedUser }) {
     try {
       const response = await axios({
         method: 'post',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/messages',
+        url: 'http://localhost:5000/api/messages',
         data: {
           receiver_id: selectedUser._id,
           message: message,

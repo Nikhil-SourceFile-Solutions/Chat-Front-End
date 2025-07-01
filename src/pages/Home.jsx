@@ -36,7 +36,7 @@ if(!token)navigate('/login')
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/home-data',
+        url: 'http://localhost:5000/api/home-data',
         headers: {
           'Content-Type': 'application/json',
           Authorization: "Bearer " + token,
@@ -58,7 +58,7 @@ if(!token)navigate('/login')
 
 
 
-
+ const [openModal, setOpenModal] = useState(false);
 
   return (
     <>
@@ -181,7 +181,10 @@ if(!token)navigate('/login')
           selectedUser ? 'hidden md:block' : 'block'
         }`}
       >
-        <div className="p-4 font-bold text-lg ">Chats</div>
+        <div className='flex justify-between items-center me-4'>
+          <div className="p-4 font-bold text-lg ">Chats</div>
+          <button className='bg-[#371449] px-3 rounded-lg text-sm/6'>New Chat</button>
+        </div>
         <ul>
           {users.map((user) => (
             <li
