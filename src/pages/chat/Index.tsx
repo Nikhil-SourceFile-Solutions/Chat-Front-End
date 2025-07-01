@@ -71,6 +71,12 @@ export default function Index({ user, setUser }) {
             });
 
             if(response.data.status=="success"){
+              
+      const sound = new Audio('../../assets/outgoing.mp3');
+      sound.play().catch((error) => {
+        console.warn('Audio autoplay blocked:', error);
+      });
+
                 setMessage('')
                 fetchChat()
             }
@@ -95,12 +101,19 @@ export default function Index({ user, setUser }) {
   
 
   useEffect(() => {
-    // Listen for incoming messages
+   
     socket.on('receive_message', (message) => {
       setChats((prevChats) => [...prevChats, message]);
-    });
 
-    // Optional: cleanup listener when component unmounts
+      const sound = new Audio('../../assets/incoming.mp3');
+      sound.play().catch((error) => {
+        console.warn('Audio autoplay blocked:', error);
+      });
+
+    });
+    
+
+
     return () => {
       socket.off('receive_message');
     };
