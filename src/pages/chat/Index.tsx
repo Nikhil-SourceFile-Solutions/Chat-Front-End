@@ -72,7 +72,7 @@ export default function Index({ user, setUser }) {
 
             if(response.data.status=="success"){
               
-      const sound = new Audio('../../assets/outgoing.mp3');
+      const sound = new Audio('/assets/outgoing.mp3');
       sound.play().catch((error) => {
         console.warn('Audio autoplay blocked:', error);
       });
@@ -105,7 +105,7 @@ export default function Index({ user, setUser }) {
     socket.on('receive_message', (message) => {
       setChats((prevChats) => [...prevChats, message]);
 
-      const sound = new Audio('../../assets/incoming.mp3');
+      const sound = new Audio('/assets/incoming.mp3');
       sound.play().catch((error) => {
         console.warn('Audio autoplay blocked:', error);
       });
