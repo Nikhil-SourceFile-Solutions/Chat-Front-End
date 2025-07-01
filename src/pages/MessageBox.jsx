@@ -172,7 +172,7 @@ export default function MessageBox({selectedUser,setSelectedUser}) {
             className={`flex ${chat.receiver_id === selectedUser._id ? 'justify-end' : 'justify-start'} mb-2`}
           >
             <div
-              className={`p-2 rounded-lg break-words whitespace-pre-wrap max-w-[75%] text-white ${
+              className={`p-2 rounded-lg break-words whitespace-pre-wrap max-w-xs text-white ${
                 chat.receiver_id === selectedUser._id ? 'bg-blue-500' : 'bg-gray-500'
               }`}
             >
