@@ -14,7 +14,7 @@ export default function Index({ user, setUser }) {
         try {
             const response = await axios({
                 method: 'get',
-                url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/chat-data',
+                url: 'http://localhost:5000/api/chat-data',
                 params: { _id: user?._id },
                 headers: {
                     'Content-Type': 'application/json',
@@ -54,10 +54,12 @@ export default function Index({ user, setUser }) {
 
         // 
 
+        if(!message) return;
+
         try {
             const response = await axios({
                 method: 'post',
-                url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/messages',
+                url: 'http://localhost:5000/api/messages',
                 data: {
                     receiver_id: user._id,
                     message: message,
@@ -88,13 +90,7 @@ export default function Index({ user, setUser }) {
         }
     };
 
-     const bottomRef = useRef(null);
 
-       useEffect(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [chats]);
 
 
   
@@ -103,6 +99,7 @@ export default function Index({ user, setUser }) {
   useEffect(() => {
    
     socket.on('receive_message', (message) => {
+       setIsTyping(false);
       setChats((prevChats) => [...prevChats, message]);
 
       const sound = new Audio('/assets/incoming.mp3');
@@ -118,6 +115,46 @@ export default function Index({ user, setUser }) {
       socket.off('receive_message');
     };
   }, []);
+
+
+  const typingTimeoutRef = useRef(null);
+
+   const handleTyping = (e) => {
+    const newMessage = e.target.value;
+    setMessage(newMessage);
+    socket.emit('typing', { toUserId: user?._id }); 
+    clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit('stop_typing', { toUserId:  user?._id });
+    }, 1000);
+  };
+
+
+  const [isTyping, setIsTyping] = useState(false);
+
+useEffect(() => {
+  socket.on('typing', ({ fromUserId }) => {
+    setIsTyping(true);
+  });
+
+  socket.on('stop_typing', ({ fromUserId }) => {
+    setIsTyping(false);
+  });
+
+  return () => {
+    socket.off('typing');
+    socket.off('stop_typing');
+  };
+}, []);
+
+     const bottomRef = useRef(null);
+
+       useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chats,isTyping]);
+
     return (
         <div className="bg-gray-50 m-4 rounded-lg  h-[80vh] flex flex-col justify-between">
 
@@ -162,19 +199,19 @@ export default function Index({ user, setUser }) {
           </div>
         ))
       )}
-
+      {isTyping && <div className="text-sm text-gray-400 mt-2">typing....</div>}
       {/* 👇 Dummy div to scroll into view */}
       <div ref={bottomRef}></div>
     </div>
 
             {/* ✅ Chat Input Area */}
-            <div className="bg-[#527ea4] rounded-lg p-2">
+            <div className="bg-[#527ea4] rounded-lg p-2 mt-4">
                 <form className="flex gap-2">
                     <input
                         type="text"
                         placeholder="Type a message..."
                         value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                       onChange={handleTyping}
                         className="flex-1  rounded-lg px-3 py-2 focus:outline-none focus:ring-0 focus:ring-none"
                     />
                     <button
