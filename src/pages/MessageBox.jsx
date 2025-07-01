@@ -173,7 +173,7 @@ export default function MessageBox({selectedUser,setSelectedUser}) {
           >
             <div
               className={`p-2 rounded-lg break-words whitespace-pre-wrap max-w-xs text-white ${
-                chat.receiver_id === selectedUser._id ? 'bg-blue-500' : 'bg-gray-500'
+                chat.receiver_id === selectedUser._id ? 'bg-[#102d45]' : 'bg-[#371449]'
               }`}
             >
               {chat.message}
@@ -189,7 +189,10 @@ export default function MessageBox({selectedUser,setSelectedUser}) {
 
             {/* Message Input */}
             <div className="p-2 bg-[#1a0529]">
-              <form className="flex gap-2">
+              <form className="flex gap-2" onSubmit={(e) => {
+    e.preventDefault();  
+    sendMessage();
+  }}>
                 <input
                   type="text"
                   placeholder="Type a message..."
