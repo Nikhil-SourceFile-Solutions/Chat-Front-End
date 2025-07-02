@@ -3,11 +3,18 @@ import React, { useEffect, useRef, useState } from 'react'
 import socket from '../socket';
 import { User, Users } from 'lucide-react';
 
-export default function MessageBox({ selectedUser, setSelectedUser }) {
+export default function MessageBox({ selectedUser, setSelectedUser ,setUsers}) {
 
   const handleBack = () => setSelectedUser(null);
 
   const token = localStorage.getItem('token');
+
+let authUser = localStorage.getItem('user');
+
+if (authUser) {
+  authUser = JSON.parse(authUser);
+}
+
 
 
   const [chats, setChats] = useState([]);
@@ -70,6 +77,13 @@ export default function MessageBox({ selectedUser, setSelectedUser }) {
           console.warn('Audio autoplay blocked:', error);
         });
 
+        setUsers(prevUsers =>
+    prevUsers.map(user =>
+      user._id === selectedUser._id
+        ? { ...user, lastMessage: response.data.chat }
+        : user
+    ))
+
         setMessage('')
         fetchChat()
       }
@@ -94,6 +108,13 @@ export default function MessageBox({ selectedUser, setSelectedUser }) {
         console.warn('Audio autoplay blocked:', error);
       });
 
+       setUsers(prevUsers =>
+    prevUsers.map(user =>
+      user._id === selectedUser._id
+        ? { ...user, lastMessage: message }
+        : user
+    ))
+
     });
 
 
@@ -109,10 +130,10 @@ export default function MessageBox({ selectedUser, setSelectedUser }) {
   const handleTyping = (e) => {
     const newMessage = e.target.value;
     setMessage(newMessage);
-    socket.emit('typing', { toUserId: selectedUser?._id });
+    socket.emit('typing', { toUserId: selectedUser?._id,fromUserId:authUser?._id });
     clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
-      socket.emit('stop_typing', { toUserId: selectedUser?._id });
+      socket.emit('stop_typing', { toUserId: selectedUser?._id,fromUserId:authUser?._id });
     }, 500);
   };
 
@@ -120,11 +141,20 @@ export default function MessageBox({ selectedUser, setSelectedUser }) {
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    socket.on('typing', ({ fromselectedUserId }) => {
-      setIsTyping(true);
+    socket.on('typing', ({ toUserId,fromUserId }) => {
+      
+      console.log("toUserId",toUserId)
+        console.log("authUserId",authUser?._id)
+
+         console.log("fromUserId",fromUserId)
+      console.log("selectedUserId",selectedUser._id)
+
+      if(fromUserId==selectedUser._id)setIsTyping(true);
+      else setIsTyping(false);
+     
     });
 
-    socket.on('stop_typing', ({ fromselectedUserId }) => {
+    socket.on('stop_typing', ({toUserId,fromUserId }) => {
       setIsTyping(false);
     });
 
@@ -132,7 +162,7 @@ export default function MessageBox({ selectedUser, setSelectedUser }) {
       socket.off('typing');
       socket.off('stop_typing');
     };
-  }, []);
+  }, [selectedUser._id]);
 
   const bottomRef = useRef(null);
 

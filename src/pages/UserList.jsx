@@ -6,7 +6,7 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 import isToday from 'dayjs/plugin/isToday';
 import isYesterday from 'dayjs/plugin/isYesterday';
-export const UserList = ({ user, selectedUser }) => {
+export const UserList = ({ user, selectedUser,typing }) => {
 
 
 
@@ -14,33 +14,12 @@ export const UserList = ({ user, selectedUser }) => {
   dayjs.extend(isYesterday);
 
 
-  const [isTyping, setIsTyping] = useState(false);
   const storedUser = localStorage.getItem('user');
   const authUser = storedUser ? JSON.parse(storedUser)?._id : null;
 
   console.log("authUser", authUser)
 
-  useEffect(() => {
-    const handleTyping = ({ fromselectedUserId }) => {
-      if (fromselectedUserId === user._id) {
-        setIsTyping(true);
-      }
-    };
-
-    const handleStopTyping = ({ fromselectedUserId }) => {
-      if (fromselectedUserId === user._id) {
-        setIsTyping(false);
-      }
-    };
-
-    socket.on('typing', handleTyping);
-    socket.on('stop_typing', handleStopTyping);
-
-    return () => {
-      socket.off('typing', handleTyping);
-      socket.off('stop_typing', handleStopTyping);
-    };
-  }, [user._id]);
+  
 
 
   const formatChatDate = (dateStr) => {
@@ -55,6 +34,8 @@ export const UserList = ({ user, selectedUser }) => {
     }
   };
 
+
+
   return (
     <div className={`flex items-center justify-between px-3 py-3 hover:bg-gray-700 cursor-pointer  ${selectedUser?._id == user?._id ? 'bg-[#020621]' : ''}`}>
       {/* Left: Avatar & Details */}
@@ -68,8 +49,7 @@ export const UserList = ({ user, selectedUser }) => {
         <div>
           <div className="text-white font-semibold text-sm">{user?.name} {authUser == user?._id && ('(You)')}</div>
           <div className="text-gray-400 text-xs flex items-center gap-1">
-            {isTyping ? 'typing...' : user?.lastMessage?.text}
-
+            {typing==user?._id ? <span className='font-semobold text-[#00c000]'>typing...</span> : user?.lastMessage?.message}
           </div>
         </div>
       </div>

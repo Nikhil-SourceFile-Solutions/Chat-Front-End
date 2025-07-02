@@ -19,20 +19,28 @@ import axios from 'axios'
 import Chat from './chat/Index'
 import { UserList } from './UserList'
 import MessageBox from './MessageBox'
+import NewChat from '../NewChat'
+import { User } from 'lucide-react'
 export default function Home() {
 
- const navigate=useNavigate();
+  const navigate = useNavigate();
 
- const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token');
 
- useEffect(()=>{
-if(!token)navigate('/login')
- },[token])
-  const [users,setUsers]=useState([]);
-  const [selectedUser,setSelectedUser]=useState(null);
-  
+let authUser = localStorage.getItem('user');
+
+if (authUser) {
+  authUser = JSON.parse(authUser);
+}
+
+  useEffect(() => {
+    if (!token) navigate('/login')
+  }, [token])
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+
   const fetchData = async () => {
-    
+
     try {
       const response = await axios({
         method: 'get',
@@ -43,7 +51,7 @@ if(!token)navigate('/login')
         },
       });
 
-      if(response.data.status=="success")setUsers(response.data.users)
+      if (response.data.status == "success") setUsers(response.data.users)
       console.log(response)
     } catch (error) {
       console.log(error)
@@ -58,7 +66,56 @@ if(!token)navigate('/login')
 
 
 
- const [openModal, setOpenModal] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+
+
+  const [filteredUsers, setFilteredUsers] = useState([]);
+
+useEffect(() => {
+  if (users.length > 0) {
+    const sorted = [...users].sort((a, b) => {
+      const aTime = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
+      const bTime = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
+      return bTime - aTime; // latest first
+    });
+
+    setFilteredUsers(sorted);
+  }
+}, [users]);
+
+
+
+  const [typing, setTyping] = useState('');
+
+  useEffect(() => {
+    socket.on('typing', ({ toUserId,fromUserId }) => {
+      
+      
+      // console.log("toUserId",toUserId)
+     
+
+         console.log("fromUserId",fromUserId)
+
+         setTyping(fromUserId)
+
+      //       console.log("user?._id",user?._id)
+     
+
+      // if(fromUserId==user?._id)setIsTyping(true);
+      // else setIsTyping(false);
+   
+     
+    });
+
+    socket.on('stop_typing', ({toUserId,fromUserId }) => {
+      setTyping('');
+    });
+
+    return () => {
+      socket.off('typing');
+      socket.off('stop_typing');
+    };
+  }, []);
 
   return (
     <>
@@ -93,7 +150,16 @@ if(!token)navigate('/login')
 
           </PopoverGroup>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <button type='button' onClick={()=>{
+
+            <button
+              type="button"
+              className="flex items-center gap-x-2 text-sm font-semibold bg-[#371449] text-white px-3 py-2 rounded-lg me-4"
+            >
+              <User className="w-4 h-4" />
+              {authUser?.name}
+            </button>
+
+            <button type='button' onClick={() => {
               localStorage.removeItem("token");
               navigate('/login')
             }} className="text-sm/6 font-semibold  bg-[#ff0000] px-3 rounded-lg me-4">
@@ -157,65 +223,50 @@ if(!token)navigate('/login')
 
       </header>
 
-   {/* <div className="flex">
-
-  <div className="w-full max-w-[350px] overflow-y-auto border-r border-gray-200">
-    {users?.map((user) => (
-      <div key={user._id} className={` ${selectedUser?._id==user._id?'bg-[#a0eaa1]':'bg-gray-50'}  p-2 m-4 rounded-lg shadow-sm`} onClick={()=>setSelectedUser(user)}>
-        <b>{user.name}</b> <br />
-        <small>{user.phone}</small>
-      </div>
-    ))}
-  </div>
-
-
-  <div className="flex-1 p-4">
-    <Chat user={selectedUser} setUser={setSelectedUser}/>
-  </div>
-</div> */}
 
       <div className="h-[80vh] text-white bg-[#1a0529] w-full flex flex-col md:flex-row ">
-      {/* Sidebar - Chat List */}
-      <div
-        className={`  md:w-[350px] w-full md:block  border-r border-[#000000] ${
-          selectedUser ? 'hidden md:block' : 'block'
-        }`}
-      >
-        <div className='flex justify-between items-center me-4'>
-          <div className="p-4 font-bold text-lg ">Chats</div>
-          <button className='bg-[#371449] px-3 rounded-lg text-sm/6'>New Chat</button>
-        </div>
-        <ul>
-          {users.map((user) => (
-            <li
-              key={user._id}
-              className=" cursor-pointer hover:bg-gray-200"
-              onClick={() => setSelectedUser(user)}
-            >
-              {/* {user.name} */}
-              <UserList user={user} selectedUser={selectedUser}/>
-            </li>
-          ))}
-        </ul>
-
-        
-      </div>
-
-      {/* Main - Chat Content */}
-      <div
-        className={`flex-1 md:block bg-[#020621] ${
-          selectedUser ? 'block' : 'hidden md:block'
-        }`}
-      >
-        {selectedUser ? (
-          <MessageBox selectedUser={selectedUser} setSelectedUser={setSelectedUser}/>
-        ) : (
-          <div className="h-full flex items-center justify-center text-gray-400">
-            Select a chat to start messaging
+        {/* Sidebar - Chat List */}
+        <div
+          className={`  md:w-[350px] w-full md:block  border-r border-[#000000] ${selectedUser ? 'hidden md:block' : 'block'
+            }`}
+        >
+          <div className='flex justify-between items-center me-4'>
+            <div className="p-4 font-bold text-lg  ">Chats</div>
+            <button className='bg-[#371449] px-3 rounded-lg text-sm/6 cursor-pointer' onClick={() => setOpenModal(true)}>New Chat</button>
           </div>
-        )}
+          <ul>
+            {filteredUsers.map((user) => (
+              <li
+                key={user._id}
+                className=" cursor-pointer hover:bg-gray-200"
+                onClick={() => setSelectedUser(user)}
+              >
+                {/* {user.name} */}
+                <UserList user={user} selectedUser={selectedUser} typing={typing}/>
+              </li>
+            ))}
+          </ul>
+
+
+        </div>
+
+        {/* Main - Chat Content */}
+        <div
+          className={`flex-1 md:block bg-[#020621] ${selectedUser ? 'block' : 'hidden md:block'
+            }`}
+        >
+          {selectedUser ? (
+            <MessageBox selectedUser={selectedUser} setSelectedUser={setSelectedUser} setUsers={setUsers}/>
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-400">
+              Select a chat to start messaging
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+
+      <NewChat isOpen={openModal} onClose={setOpenModal} setSelectedUser={setSelectedUser} />
     </>
   )
 }
