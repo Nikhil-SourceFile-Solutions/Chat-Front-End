@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "install:force": "npm install --force"
   },
   "dependencies": {
     "@emoji-mart/react": "^1.1.1",
