@@ -1,8 +1,9 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
 import socket from '../socket';
-import { User, Users } from 'lucide-react';
-
+import { Paperclip, SmilePlus, User, Users } from 'lucide-react';
+import Picker from '@emoji-mart/react';
+// import 'emoji-mart/css/emoji-mart.css';
 export default function MessageBox({ selectedUser, setSelectedUser ,setUsers}) {
 
   const handleBack = () => setSelectedUser(null);
@@ -23,7 +24,7 @@ if (authUser) {
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://localhost:5000/api/chat-data',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/chat-data',
         params: { _id: selectedUser?._id },
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ if (authUser) {
     try {
       const response = await axios({
         method: 'post',
-        url: 'http://localhost:5000/api/messages',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/messages',
         data: {
           receiver_id: selectedUser._id,
           message: message,
@@ -179,6 +180,28 @@ if (authUser) {
       hour12: true,
     });
   };
+
+   const [showPicker, setShowPicker] = useState(false);
+
+ const pickerRef = useRef(null);
+
+   const handleEmojiSelect = (emoji) => {
+    setMessage(prev => prev + emoji.native);  
+  };
+
+   useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+        setShowPicker(false);
+      }
+    };
+    if (showPicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showPicker]);
   return (
     <div className="flex flex-col h-full">
       {/* Mobile Only Back Button */}
@@ -240,7 +263,10 @@ if (authUser) {
                 style={{ wordBreak: 'break-word' }}
               >
                 <div>
-                  {chat.message}
+                  <p className={/^[\p{Emoji}\s]+$/u.test(chat.message) ? 'text-4xl' : 'text-base'}>
+  {chat.message}
+</p>
+                 
                 </div>
 
                 {/* Footer row for time + tick */}
@@ -309,12 +335,33 @@ if (authUser) {
         <div ref={bottomRef}></div>
 
       </div>
-
+      <div className="relative">
+ {showPicker && (
+        <div className="absolute bottom-12" ref={pickerRef}>
+          <Picker onEmojiSelect={handleEmojiSelect} />
+        </div>
+      )}
       <div className="fixed bottom-0 left-0 right-0 p-2 bg-[#1a0529] z-10 sm:static sm:z-0">
         <form className="flex gap-2" onSubmit={(e) => {
           e.preventDefault();
           sendMessage();
         }}>
+         <div className='flex items-center gap-3'>
+           <button
+            type="button" onClick={() => setShowPicker(!showPicker)}
+            className="bg-[#371449] text-white px-2 py-2 rounded-lg hover:bg-[#020621]"
+          >
+          <SmilePlus />
+          </button>
+
+          <button
+            type="button" 
+            onClick={()=>alert('Comming Soon')}
+            className="bg-[#371449] text-white px-2 py-2 rounded-lg hover:bg-[#020621]"
+          >
+           <Paperclip />
+          </button>
+         </div>
           <input
             type="text"
             placeholder="Type a message..."
@@ -324,11 +371,12 @@ if (authUser) {
           />
           <button
             type="submit" // changed to submit for Enter key support
-            className="bg-[#371449] text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+            className="bg-[#371449] text-white px-4 py-2 rounded-lg hover:bg-[#020621]"
           >
             Send
           </button>
         </form>
+      </div>
       </div>
     </div>
   )
