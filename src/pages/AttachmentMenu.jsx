@@ -68,7 +68,7 @@ const AttachmentMenu = ({ message, setMessage, selectedFile, setSelectedFile, ty
       <button
         type="button"
         onClick={() => setShowMenu(!showMenu)}
-        className="bg-[#371449] text-white p-2 rounded-lg hover:bg-[#020621]"
+        className="bg-[#371449] text-white p-2 rounded-lg hover:bg-[#020621] cursor-pointer"
       >
         <Paperclip />
       </button>

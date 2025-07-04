@@ -41,9 +41,17 @@ export const UserList = ({ user, selectedUser,typing }) => {
       {/* Left: Avatar & Details */}
       <div className="flex items-center gap-3">
         {/* Avatar */}
-        <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center">
-          <Users className="h-5 w-5 text-white opacity-70" />
-        </div>
+        <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center overflow-hidden">
+  {user?.avatar ? (
+    <img
+      src={`http://localhost:5000/${user.avatar}`}
+      alt="Profile"
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    <Users className="h-5 w-5 text-white opacity-70" />
+  )}
+</div>
 
         {/* Name & Message Info */}
         <div>

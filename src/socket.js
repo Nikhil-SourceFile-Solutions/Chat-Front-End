@@ -17,7 +17,7 @@ console.log("storedUser",parsed._id)
   }
 }
 
-const socket = io('http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io', {
+const socket = io('http://localhost:5000', {
   transports: ['websocket'],
   auth: {
     userId,

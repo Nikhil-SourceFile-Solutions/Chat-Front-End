@@ -21,6 +21,7 @@ import { UserList } from './UserList'
 import MessageBox from './MessageBox'
 import NewChat from '../NewChat'
 import { User } from 'lucide-react'
+import ProfileModal from './ProfileModal'
 export default function Home() {
 
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ if (authUser) {
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/home-data',
+        url: 'http://localhost:5000/api/home-data',
         headers: {
           'Content-Type': 'application/json',
           Authorization: "Bearer " + token,
@@ -85,6 +86,8 @@ if (authUser) {
 
 
   const [filteredUsers, setFilteredUsers] = useState([]);
+
+  const [profileModal,setProfileModal]=useState(false)
 
 useEffect(() => {
   if (users.length > 0) {
@@ -172,7 +175,9 @@ useEffect(() => {
 
             <button
               type="button"
-              className="flex items-center gap-x-2 text-sm font-semibold bg-[#371449] text-white px-3 py-2 rounded-lg me-4"
+              className="flex items-center cursor-pointer gap-x-2 text-sm font-semibold bg-[#371449] text-white px-3 py-2 rounded-lg me-4"
+
+              onClick={()=>setProfileModal(!profileModal)}
             >
               <User className="w-4 h-4" />
               {authUser?.name}
@@ -181,7 +186,7 @@ useEffect(() => {
             <button type='button' onClick={() => {
               localStorage.removeItem("token");
               navigate('/login')
-            }} className="text-sm/6 font-semibold  bg-[#ff0000] px-3 rounded-lg me-4">
+            }} className="text-sm/6 font-semibold cursor-pointer bg-[#ff0000] px-3 rounded-lg me-4">
               Logout
             </button>
           </div>
@@ -286,6 +291,8 @@ useEffect(() => {
 
 
       <NewChat isOpen={openModal} onClose={setOpenModal} setSelectedUser={setSelectedUser} />
+
+      <ProfileModal isOpen={profileModal} onClose={setProfileModal}/>
     </>
   )
 }

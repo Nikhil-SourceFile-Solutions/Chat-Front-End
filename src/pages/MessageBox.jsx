@@ -25,7 +25,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/chat-data',
+        url: 'http://localhost:5000/api/chat-data',
         params: { _id: selectedUser?._id },
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
       formData.append('file', selectedFile);
       const response = await axios({
         method: 'post',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/messages',
+        url: 'http://localhost:5000/api/messages',
         data: formData,
         headers: {
           // 'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
 
   useEffect(() => {
     if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+      bottomRef.current.scrollIntoView({ behavior: 'auto' });
     }
   }, [chats, isTyping]);
 
@@ -238,9 +238,17 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
       <div className='hidden md:block p-3 bg-[#1a0529]'>
         <div className="flex items-center gap-3 ">
           {/* Avatar */}
-          <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center">
-            <User className="h-5 w-5 text-white opacity-70" />
-          </div>
+          <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center overflow-hidden">
+  {selectedUser?.avatar ? (
+    <img
+      src={`http://localhost:5000/${selectedUser.avatar}`}
+      alt="Profile"
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    <User className="h-5 w-5 text-white opacity-70" />
+  )}
+</div>
 
           {/* Name & Message Info */}
           <div>
@@ -278,10 +286,10 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
                 <div>
 
                   {chat?.type == 'image' && (<div>
-                    <img src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa" 
+                    <img src={`http://localhost:5000/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa" 
                     onLoad={() => {
     if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+      bottomRef.current.scrollIntoView({ behavior: 'auto' });
     }
   }}
                     />
@@ -390,7 +398,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
             <Picker onEmojiSelect={handleEmojiSelect} />
           </div>
         )}
-        <div className="fixed bottom-0 left-0  p-2 bg-[#1a0529] z-10 sm:static sm:z-0">
+        <div className="fixed bottom-0 left-0 right-0 p-2 bg-[#1a0529] z-10 sm:static sm:z-0">
           <form className="flex gap-2" onSubmit={(e) => {
             e.preventDefault();
             sendMessage();
@@ -402,7 +410,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
             <div className='flex items-center gap-3'>
               <button
                 type="button" onClick={() => setShowPicker(!showPicker)}
-                className="bg-[#371449] text-white px-2 py-2 rounded-lg hover:bg-[#020621]"
+                className="bg-[#371449] text-white px-2 py-2 rounded-lg hover:bg-[#020621] cursor-pointer"
               >
                 <SmilePlus />
               </button>
@@ -428,7 +436,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
             />
             <button
               type="submit" // changed to submit for Enter key support
-              className="bg-[#371449] text-white px-4 py-2 rounded-lg hover:bg-[#020621]"
+              className="bg-[#371449] text-white px-4 py-2 rounded-lg hover:bg-[#020621] cursor-pointer"
             >
               Send
             </button>
