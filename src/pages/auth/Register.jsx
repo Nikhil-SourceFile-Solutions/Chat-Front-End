@@ -98,31 +98,31 @@ const Login = () => {
 
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800">Register</h2>
-        <form  className="space-y-4">
+    <div className="flex items-center justify-center min-h-screen bg-[#020621]">
+      <div className="w-full max-w-md p-8 space-y-6 bg-[#371449] rounded-lg shadow-md m-4">
+        <h2 className="text-2xl font-bold text-center text-white">Register</h2>
+        <form  className="space-y-4" autoComplete='off'>
             <div>
-            <label  className="block mb-1 text-sm font-medium text-gray-700">
+            <label  className="block mb-1 text-sm font-medium text-white">
               Name
             </label>
             <input
             name="name"
               type="text"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={params.name}
               onChange={(e) => changeValue(e)}
             />
               {errors?.name && <span className='text-red-600'>{errors.name}</span>}
           </div>
           <div>
-            <label  className="block mb-1 text-sm font-medium text-gray-700">
+            <label  className="block mb-1 text-sm font-medium text-white">
               Email
             </label>
             <input
             name="email"
               type="email"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={params.email}
               onChange={(e) => changeValue(e)}
             />
@@ -130,13 +130,13 @@ const Login = () => {
           </div>
 
             <div>
-            <label  className="block mb-1 text-sm font-medium text-gray-700">
+            <label  className="block mb-1 text-sm font-medium text-white">
               Phone
             </label>
             <input
             name="phone"
               type="phone"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={params.phone}
               onChange={(e) => changeValue(e)}
             />
@@ -144,13 +144,13 @@ const Login = () => {
           </div>
 
           <div>
-            <label  className="block mb-1 text-sm font-medium text-gray-700">
+            <label  className="block mb-1 text-sm font-medium text-white">
               Password
             </label>
             <input
               type="password"
               name="password"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={params.password}
               onChange={(e) => changeValue(e)}
             />
@@ -158,7 +158,7 @@ const Login = () => {
           </div>
           <button
             type="button"
-            className="w-full py-2 btn font-semibold text-white bg-blue-500 rounded-md hover:bg-blue-600"
+             className="w-full py-2 mt-4 btn font-semibold text-white bg-[#1a0529] rounded-md hover:bg-[#020621] cursor-pointer"
             onClick={formSubmit}
             disabled={isBtnLoading}
           >
@@ -167,7 +167,7 @@ const Login = () => {
         </form>
 
          <div>
-         <NavLink className='text-[#00a9f2] font-bold' to={'/login'}>Login</NavLink>
+         <NavLink className='text-white font-bold' to={'/login'}>Login</NavLink>
         </div>
       </div>
     </div>
