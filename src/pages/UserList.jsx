@@ -6,7 +6,7 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 import isToday from 'dayjs/plugin/isToday';
 import isYesterday from 'dayjs/plugin/isYesterday';
-export const UserList = ({ user, selectedUser,typing }) => {
+export const UserList = ({ user, selectedUser, typing }) => {
 
 
 
@@ -19,7 +19,7 @@ export const UserList = ({ user, selectedUser,typing }) => {
 
   console.log("authUser", authUser)
 
-  
+
 
 
   const formatChatDate = (dateStr) => {
@@ -42,22 +42,32 @@ export const UserList = ({ user, selectedUser,typing }) => {
       <div className="flex items-center gap-3">
         {/* Avatar */}
         <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center overflow-hidden">
-  {user?.avatar ? (
-    <img
-      src={`http://localhost:5000/${user.avatar}`}
-      alt="Profile"
-      className="h-full w-full object-cover"
-    />
-  ) : (
-    <Users className="h-5 w-5 text-white opacity-70" />
-  )}
-</div>
+          {user?.avatar ? (
+            <img
+              src={`http://localhost:5000/${user.avatar}`}
+              alt="Profile"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <Users className="h-5 w-5 text-white opacity-70" />
+          )}
+        </div>
 
         {/* Name & Message Info */}
         <div>
           <div className="text-white font-semibold text-sm">{user?.name} {authUser == user?._id && ('(You)')}</div>
-          <div className="text-gray-400 text-xs flex items-center gap-1">
-            {typing==user?._id ? <span className='font-semobold text-[#00c000]'>typing...</span> : user?.lastMessage?.message}
+          <div className="text-gray-400 text-xs flex items-center gap-1 truncate max-w-[220px]">
+            {typing === user?._id ? (
+              <span className="font-semibold text-[#00c000]">typing...</span>
+            ) : user?.lastMessage ? (
+              user?.lastMessage?.type === 'text' ? (
+                user?.lastMessage.message
+              ) : (
+                '📄 ' + user?.lastMessage.type
+              )
+            ) : (
+              ''
+            )}
           </div>
         </div>
       </div>

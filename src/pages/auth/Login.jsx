@@ -103,31 +103,31 @@ const Login = () => {
 
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800">Login</h2>
-        <form  className="space-y-4">
+    <div className="flex items-center justify-center min-h-screen bg-[#020621]">
+      <div className="w-full m-4 max-w-md p-8 space-y-6 bg-[#371449] rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-center text-white">Login</h2>
+        <form  className="space-y-4" autoComplete='off'>
           <div>
-            <label  className="block mb-1 text-sm font-medium text-gray-700">
+            <label  className="block mb-1 text-sm font-medium text-white">
               Email
             </label>
             <input
             name="email"
               type="email"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={params.email}
               onChange={(e) => changeValue(e)}
             />
               {errors?.email && <span className='text-red-600'>{errors.email}</span>}
           </div>
           <div>
-            <label  className="block mb-1 text-sm font-medium text-gray-700">
+            <label  className="block mb-1 text-sm font-medium text-white">
               Password
             </label>
             <input
               type="password"
               name="password"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={params.password}
               onChange={(e) => changeValue(e)}
             />
@@ -144,7 +144,7 @@ const Login = () => {
         </form>
 
         <div>
-         <NavLink className='text-[#00a9f2] font-bold' to={'/register'}> Register Now </NavLink>
+         <NavLink className='text-white font-bold' to={'/register'}> Register Now </NavLink>
         </div>
       </div>
     </div>
