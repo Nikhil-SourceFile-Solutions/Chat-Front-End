@@ -4,7 +4,7 @@ import socket from '../socket';
 import { Paperclip, SmilePlus, User, Users } from 'lucide-react';
 import Picker from '@emoji-mart/react';
 import AttachmentMenu from './AttachmentMenu';
-// import 'emoji-mart/css/emoji-mart.css';
+
 export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) {
 
   const handleBack = () => setSelectedUser(null);
@@ -56,8 +56,11 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
   const [selectedFile, setSelectedFile] = useState(null);
   const [type, setType] = useState('text');
   const sendMessage = async () => {
-    if (type=="text" && !message) return;
-    else if(!selectedFile)return;
+    console.log(message)
+    if (type == "text" && !message) return;
+    else if (type == "document" &&  !selectedFile)return
+
+    
     try {
       const formData = new FormData();
       formData.append('receiver_id', selectedUser._id);
@@ -239,16 +242,16 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
         <div className="flex items-center gap-3 ">
           {/* Avatar */}
           <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center overflow-hidden">
-  {selectedUser?.avatar ? (
-    <img
-      src={`http://localhost:5000/${selectedUser.avatar}`}
-      alt="Profile"
-      className="h-full w-full object-cover"
-    />
-  ) : (
-    <User className="h-5 w-5 text-white opacity-70" />
-  )}
-</div>
+            {selectedUser?.avatar ? (
+              <img
+                src={`http://localhost:5000/${selectedUser.avatar}`}
+                alt="Profile"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <User className="h-5 w-5 text-white opacity-70" />
+            )}
+          </div>
 
           {/* Name & Message Info */}
           <div>
@@ -286,12 +289,12 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
                 <div>
 
                   {chat?.type == 'image' && (<div>
-                    <img src={`http://localhost:5000/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa" 
-                    onLoad={() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'auto' });
-    }
-  }}
+                    <img src={`http://localhost:5000/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa"
+                      onLoad={() => {
+                        if (bottomRef.current) {
+                          bottomRef.current.scrollIntoView({ behavior: 'auto' });
+                        }
+                      }}
                     />
                   </div>
                   )}
@@ -403,10 +406,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
             e.preventDefault();
             sendMessage();
           }}>
-            {/* <input
-  type="file"
-  onChange={(e) => setSelectedFile(e.target.files[0])}
-/> */}
+       
             <div className='flex items-center gap-3'>
               <button
                 type="button" onClick={() => setShowPicker(!showPicker)}
@@ -414,18 +414,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
               >
                 <SmilePlus />
               </button>
-
-              {/* <button
-            type="button" 
-            onClick={()=>alert('Comming Soon')}
-            className="bg-[#371449] text-white px-2 py-2 rounded-lg hover:bg-[#020621]"
-          >
-           <Paperclip />
-          </button> */}
-
               <AttachmentMenu message={message} setMessage={setMessage} selectedFile={selectedFile} setSelectedFile={setSelectedFile} type={type} setType={setType} sendMessage={sendMessage} />
-
-
             </div>
             <input
               type="text"

@@ -25,7 +25,6 @@ const AttachmentMenu = ({ message, setMessage, selectedFile, setSelectedFile, ty
     setSelectedFile(null);
     setPreviewUrl('');
     setCaption('');
-    setMessage('');
     setType('text');
   };
 
