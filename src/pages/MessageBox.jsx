@@ -56,7 +56,8 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
   const [selectedFile, setSelectedFile] = useState(null);
   const [type, setType] = useState('text');
   const sendMessage = async () => {
-    if (!message) return;
+    if (type=="text" && !message) return;
+    else if(!selectedFile)return;
     try {
       const formData = new FormData();
       formData.append('receiver_id', selectedUser._id);
@@ -206,14 +207,14 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
   }, [showPicker]);
 
   const formatFileSize = (bytes) => {
-  if (!bytes) return '0 KB';
-  const kb = bytes / 1024;
-  if (kb < 1024) return `${kb.toFixed(1)} KB`;
-  const mb = kb / 1024;
-  if (mb < 1024) return `${mb.toFixed(1)} MB`;
-  const gb = mb / 1024;
-  return `${gb.toFixed(1)} GB`;
-};
+    if (!bytes) return '0 KB';
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(1)} KB`;
+    const mb = kb / 1024;
+    if (mb < 1024) return `${mb.toFixed(1)} MB`;
+    const gb = mb / 1024;
+    return `${gb.toFixed(1)} GB`;
+  };
   return (
     <div className="flex flex-col h-full">
       {/* Mobile Only Back Button */}
@@ -277,31 +278,37 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
                 <div>
 
                   {chat?.type == 'image' && (<div>
-                    <img src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa" />
+                    <img src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa" 
+                    onLoad={() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }}
+                    />
                   </div>
                   )}
 
-                 {chat?.type === 'document' && (
-  <div className="flex items-center  rounded-lg p-3 bg-[#1a052982] text-white max-w-xs mb-2">
-    {/* Icon */}
-    <div className="flex-shrink-0 mr-3">
-      <div className="bg-[#527ea4] text-blue-600 rounded-full p-2">
-        {/* You can use Lucide FileText or any icon */}
-        📄
-      </div>
-    </div>
+                  {chat?.type === 'document' && (
+                    <div className="flex items-center  rounded-lg p-3 bg-[#1a052982] text-white max-w-xs mb-2">
+                      {/* Icon */}
+                      <div className="flex-shrink-0 mr-3">
+                        <div className="bg-[#527ea4] text-blue-600 rounded-full p-2">
+                          {/* You can use Lucide FileText or any icon */}
+                          📄
+                        </div>
+                      </div>
 
-    {/* File Info */}
-    <div className="flex-grow overflow-hidden">
-      <div className="font-semibold  truncate">
-        {chat?.data?.originalName || 'Untitled'}
-      </div>
-      <div className="text-xs text-gray-500">
-        {formatFileSize(chat?.data?.fileSize)}
-      </div>
-    </div>
-  </div>
-)}
+                      {/* File Info */}
+                      <div className="flex-grow overflow-hidden">
+                        <div className="font-semibold  truncate">
+                          {chat?.data?.originalName || 'Untitled'}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {formatFileSize(chat?.data?.fileSize)}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <p className={/^[\p{Emoji}\s]+$/u.test(chat.message) ? 'text-4xl' : 'text-base'}>
                     {chat.message}
