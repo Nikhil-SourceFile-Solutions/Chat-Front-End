@@ -39,12 +39,26 @@ if (authUser) {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
 
+
+
+  useEffect(() => {
+  if (selectedUser) {
+    console.log("selectedUser", selectedUser);
+
+    const already = users.find((u) => u._id === selectedUser._id);
+
+    console.log("already", already);
+
+    if (!already) setUsers(prev => [...prev, selectedUser]);
+  }
+}, [selectedUser])
+
   const fetchData = async () => {
 
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/home-data',
+        url: 'http://localhost:5000/api/home-data',
         headers: {
           'Content-Type': 'application/json',
           Authorization: "Bearer " + token,
@@ -54,7 +68,8 @@ if (authUser) {
       if (response.data.status == "success") setUsers(response.data.users)
       console.log(response)
     } catch (error) {
-      console.log(error)
+     
+      if(error.response.status==401)navigate('/login');
     }
   }
 
@@ -116,6 +131,10 @@ useEffect(() => {
       socket.off('stop_typing');
     };
   }, []);
+
+   socket.on('apple', (data) => {
+      console.log("apple",data)
+    });
 
   return (
     <>

@@ -1,0 +1,5 @@
+1) image upload in MERN STATCK
+1) New chat after selection show in sidebar
+2) When selecting user for chat , info to reciver (like whatsapp) along previous messages read (blue tick)
+3) When user enter to chat info all interated user's to that he is live
+4) unreaded count need to implement logic
