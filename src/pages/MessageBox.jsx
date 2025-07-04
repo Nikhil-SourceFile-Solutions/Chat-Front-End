@@ -3,18 +3,19 @@ import React, { useEffect, useRef, useState } from 'react'
 import socket from '../socket';
 import { Paperclip, SmilePlus, User, Users } from 'lucide-react';
 import Picker from '@emoji-mart/react';
+import AttachmentMenu from './AttachmentMenu';
 // import 'emoji-mart/css/emoji-mart.css';
-export default function MessageBox({ selectedUser, setSelectedUser ,setUsers}) {
+export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) {
 
   const handleBack = () => setSelectedUser(null);
 
   const token = localStorage.getItem('token');
 
-let authUser = localStorage.getItem('user');
+  let authUser = localStorage.getItem('user');
 
-if (authUser) {
-  authUser = JSON.parse(authUser);
-}
+  if (authUser) {
+    authUser = JSON.parse(authUser);
+  }
 
 
 
@@ -24,7 +25,7 @@ if (authUser) {
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://localhost:5000/api/chat-data',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/chat-data',
         params: { _id: selectedUser?._id },
         headers: {
           'Content-Type': 'application/json',
@@ -52,21 +53,22 @@ if (authUser) {
   }, [selectedUser?._id])
 
   const [message, setMessage] = useState('');
-
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [type, setType] = useState('text');
   const sendMessage = async () => {
     if (!message) return;
     try {
+      const formData = new FormData();
+      formData.append('receiver_id', selectedUser._id);
+      formData.append('message', message);
+      formData.append('type', type);   // or 'image' if sending image
+      formData.append('file', selectedFile);
       const response = await axios({
         method: 'post',
-        url: 'http://localhost:5000/api/messages',
-        data: {
-          receiver_id: selectedUser._id,
-          message: message,
-          type: 'text',
-          data: '',
-        },
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/messages',
+        data: formData,
         headers: {
-          'Content-Type': 'application/json',
+          // 'Content-Type': 'application/json',
           Authorization: "Bearer " + token,
         },
       });
@@ -79,11 +81,11 @@ if (authUser) {
         });
 
         setUsers(prevUsers =>
-    prevUsers.map(user =>
-      user._id === selectedUser._id
-        ? { ...user, lastMessage: response.data.chat }
-        : user
-    ))
+          prevUsers.map(user =>
+            user._id === selectedUser._id
+              ? { ...user, lastMessage: response.data.chat }
+              : user
+          ))
 
         setMessage('')
         fetchChat()
@@ -109,12 +111,12 @@ if (authUser) {
         console.warn('Audio autoplay blocked:', error);
       });
 
-       setUsers(prevUsers =>
-    prevUsers.map(user =>
-      user._id === selectedUser._id
-        ? { ...user, lastMessage: message }
-        : user
-    ))
+      setUsers(prevUsers =>
+        prevUsers.map(user =>
+          user._id === selectedUser._id
+            ? { ...user, lastMessage: message }
+            : user
+        ))
 
     });
 
@@ -131,10 +133,10 @@ if (authUser) {
   const handleTyping = (e) => {
     const newMessage = e.target.value;
     setMessage(newMessage);
-    socket.emit('typing', { toUserId: selectedUser?._id,fromUserId:authUser?._id });
+    socket.emit('typing', { toUserId: selectedUser?._id, fromUserId: authUser?._id });
     clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
-      socket.emit('stop_typing', { toUserId: selectedUser?._id,fromUserId:authUser?._id });
+      socket.emit('stop_typing', { toUserId: selectedUser?._id, fromUserId: authUser?._id });
     }, 500);
   };
 
@@ -142,20 +144,20 @@ if (authUser) {
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    socket.on('typing', ({ toUserId,fromUserId }) => {
-      
-      console.log("toUserId",toUserId)
-        console.log("authUserId",authUser?._id)
+    socket.on('typing', ({ toUserId, fromUserId }) => {
 
-         console.log("fromUserId",fromUserId)
-      console.log("selectedUserId",selectedUser._id)
+      console.log("toUserId", toUserId)
+      console.log("authUserId", authUser?._id)
 
-      if(fromUserId==selectedUser._id)setIsTyping(true);
+      console.log("fromUserId", fromUserId)
+      console.log("selectedUserId", selectedUser._id)
+
+      if (fromUserId == selectedUser._id) setIsTyping(true);
       else setIsTyping(false);
-     
+
     });
 
-    socket.on('stop_typing', ({toUserId,fromUserId }) => {
+    socket.on('stop_typing', ({ toUserId, fromUserId }) => {
       setIsTyping(false);
     });
 
@@ -181,15 +183,15 @@ if (authUser) {
     });
   };
 
-   const [showPicker, setShowPicker] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
 
- const pickerRef = useRef(null);
+  const pickerRef = useRef(null);
 
-   const handleEmojiSelect = (emoji) => {
-    setMessage(prev => prev + emoji.native);  
+  const handleEmojiSelect = (emoji) => {
+    setMessage(prev => prev + emoji.native);
   };
 
-   useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (pickerRef.current && !pickerRef.current.contains(event.target)) {
         setShowPicker(false);
@@ -202,6 +204,16 @@ if (authUser) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showPicker]);
+
+  const formatFileSize = (bytes) => {
+  if (!bytes) return '0 KB';
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${kb.toFixed(1)} KB`;
+  const mb = kb / 1024;
+  if (mb < 1024) return `${mb.toFixed(1)} MB`;
+  const gb = mb / 1024;
+  return `${gb.toFixed(1)} GB`;
+};
   return (
     <div className="flex flex-col h-full">
       {/* Mobile Only Back Button */}
@@ -263,10 +275,40 @@ if (authUser) {
                 style={{ wordBreak: 'break-word' }}
               >
                 <div>
+
+                  {chat?.type == 'image' && (<div>
+                    <img src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa" />
+                  </div>
+                  )}
+
+                 {chat?.type === 'document' && (
+  <div className="flex items-center  rounded-lg p-3 bg-[#1a052982] text-white max-w-xs mb-2">
+    {/* Icon */}
+    <div className="flex-shrink-0 mr-3">
+      <div className="bg-[#527ea4] text-blue-600 rounded-full p-2">
+        {/* You can use Lucide FileText or any icon */}
+        📄
+      </div>
+    </div>
+
+    {/* File Info */}
+    <div className="flex-grow overflow-hidden">
+      <div className="font-semibold  truncate">
+        {chat?.data?.originalName || 'Untitled'}
+      </div>
+      <div className="text-xs text-gray-500">
+        {formatFileSize(chat?.data?.fileSize)}
+      </div>
+    </div>
+  </div>
+)}
+
                   <p className={/^[\p{Emoji}\s]+$/u.test(chat.message) ? 'text-4xl' : 'text-base'}>
-  {chat.message}
-</p>
-                 
+                    {chat.message}
+                  </p>
+
+
+
                 </div>
 
                 {/* Footer row for time + tick */}
@@ -336,47 +378,55 @@ if (authUser) {
 
       </div>
       <div className="relative">
- {showPicker && (
-        <div className="absolute bottom-12" ref={pickerRef}>
-          <Picker onEmojiSelect={handleEmojiSelect} />
-        </div>
-      )}
-      <div className="fixed bottom-0 left-0 right-0 p-2 bg-[#1a0529] z-10 sm:static sm:z-0">
-        <form className="flex gap-2" onSubmit={(e) => {
-          e.preventDefault();
-          sendMessage();
-        }}>
-         <div className='flex items-center gap-3'>
-           <button
-            type="button" onClick={() => setShowPicker(!showPicker)}
-            className="bg-[#371449] text-white px-2 py-2 rounded-lg hover:bg-[#020621]"
-          >
-          <SmilePlus />
-          </button>
+        {showPicker && (
+          <div className="absolute bottom-12" ref={pickerRef}>
+            <Picker onEmojiSelect={handleEmojiSelect} />
+          </div>
+        )}
+        <div className="fixed bottom-0 left-0  p-2 bg-[#1a0529] z-10 sm:static sm:z-0">
+          <form className="flex gap-2" onSubmit={(e) => {
+            e.preventDefault();
+            sendMessage();
+          }}>
+            {/* <input
+  type="file"
+  onChange={(e) => setSelectedFile(e.target.files[0])}
+/> */}
+            <div className='flex items-center gap-3'>
+              <button
+                type="button" onClick={() => setShowPicker(!showPicker)}
+                className="bg-[#371449] text-white px-2 py-2 rounded-lg hover:bg-[#020621]"
+              >
+                <SmilePlus />
+              </button>
 
-          <button
+              {/* <button
             type="button" 
             onClick={()=>alert('Comming Soon')}
             className="bg-[#371449] text-white px-2 py-2 rounded-lg hover:bg-[#020621]"
           >
            <Paperclip />
-          </button>
-         </div>
-          <input
-            type="text"
-            placeholder="Type a message..."
-            className="flex-1 rounded-lg px-3 py-2 focus:outline-none"
-            value={message}
-            onChange={handleTyping}
-          />
-          <button
-            type="submit" // changed to submit for Enter key support
-            className="bg-[#371449] text-white px-4 py-2 rounded-lg hover:bg-[#020621]"
-          >
-            Send
-          </button>
-        </form>
-      </div>
+          </button> */}
+
+              <AttachmentMenu message={message} setMessage={setMessage} selectedFile={selectedFile} setSelectedFile={setSelectedFile} type={type} setType={setType} sendMessage={sendMessage} />
+
+
+            </div>
+            <input
+              type="text"
+              placeholder="Type a message..."
+              className="flex-1 rounded-lg px-3 py-2 focus:outline-none"
+              value={message}
+              onChange={handleTyping}
+            />
+            <button
+              type="submit" // changed to submit for Enter key support
+              className="bg-[#371449] text-white px-4 py-2 rounded-lg hover:bg-[#020621]"
+            >
+              Send
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )

@@ -58,7 +58,7 @@ if (authUser) {
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://localhost:5000/api/home-data',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/home-data',
         headers: {
           'Content-Type': 'application/json',
           Authorization: "Bearer " + token,
