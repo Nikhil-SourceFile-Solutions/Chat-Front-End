@@ -17,7 +17,7 @@ const NewChat = ({ isOpen, onClose,setSelectedUser }) => {
 
        const response = await axios({
               method: 'get',
-              url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/all-users',
+              url: 'http://localhost:5000/api/all-users',
               headers: {
                 'Content-Type': 'application/json',
                 Authorization: "Bearer " + token,

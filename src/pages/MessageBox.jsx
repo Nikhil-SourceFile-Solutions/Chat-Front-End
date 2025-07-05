@@ -25,7 +25,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/chat-data',
+        url: 'http://localhost:5000/api/chat-data',
         params: { _id: selectedUser?._id },
         headers: {
           'Content-Type': 'application/json',
@@ -58,9 +58,9 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
   const sendMessage = async () => {
     console.log(message)
     if (type == "text" && !message) return;
-    else if (type == "document" &&  !selectedFile)return
+    else if (type == "document" && !selectedFile) return
 
-    
+
     try {
       const formData = new FormData();
       formData.append('receiver_id', selectedUser._id);
@@ -69,7 +69,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
       formData.append('file', selectedFile);
       const response = await axios({
         method: 'post',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/messages',
+        url: 'http://localhost:5000/api/messages',
         data: formData,
         headers: {
           // 'Content-Type': 'application/json',
@@ -104,83 +104,90 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
 
 
 
-const s = socket();  // Declare once
+  const s = socket();  // Declare once
 
-useEffect(() => {
-  if (!s) return;
+  useEffect(() => {
+    if (!s) return;
 
-  const handleReceiveMessage = (message) => {
-    setChats(prev => [...prev, message]);
-    const sound = new Audio('/assets/incoming.mp3');
-    sound.play().catch(err => console.warn('Audio blocked:', err));
+    const handleReceiveMessage = (message) => {
+      setChats(prev => [...prev, message]);
+      const sound = new Audio('/assets/incoming.mp3');
+      sound.play().catch(err => console.warn('Audio blocked:', err));
 
-    setUsers(prevUsers =>
-      prevUsers.map(user =>
-        user._id === selectedUser?._id
-          ? { ...user, lastMessage: message }
-          : user
-      )
-    );
-  };
+      setUsers(prevUsers =>
+        prevUsers.map(user =>
+          user._id === selectedUser?._id
+            ? { ...user, lastMessage: message }
+            : user
+        )
+      );
+    };
 
-  s.on('receive_message', handleReceiveMessage);
+    s.on('receive_message', handleReceiveMessage);
 
-  return () => {
-    s.off('receive_message', handleReceiveMessage);
-  };
-}, []);
+    return () => {
+      s.off('receive_message', handleReceiveMessage);
+    };
+  }, []);
 
-const typingTimeoutRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
-const handleTyping = (e) => {
-  const newMessage = e.target.value;
-  setMessage(newMessage);
+  const handleTyping = (e) => {
+    const newMessage = e.target.value;
+    setMessage(newMessage);
 
-  if (s && selectedUser?._id && authUser?._id) {
-    s.emit('typing', { toUserId: selectedUser._id, fromUserId: authUser._id });
-  }
-
-  clearTimeout(typingTimeoutRef.current);
-  typingTimeoutRef.current = setTimeout(() => {
     if (s && selectedUser?._id && authUser?._id) {
-      s.emit('stop_typing', { toUserId: selectedUser._id, fromUserId: authUser._id });
+      s.emit('typing', { toUserId: selectedUser._id, fromUserId: authUser._id });
     }
-  }, 500);
-};
 
-const [isTyping,setIsTyping]=useState(false)
-
-useEffect(() => {
-  if (!s) return;
-
-  const handleTyping = ({ fromUserId }) => {
-    if (fromUserId === selectedUser?._id) setIsTyping(true);
-    else setIsTyping(false);
+    clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      if (s && selectedUser?._id && authUser?._id) {
+        s.emit('stop_typing', { toUserId: selectedUser._id, fromUserId: authUser._id });
+      }
+    }, 500);
   };
 
-  const handleStopTyping = () => setIsTyping(false);
+  const [isTyping, setIsTyping] = useState(false)
 
-  s.on('typing', handleTyping);
-  s.on('stop_typing', handleStopTyping);
+  useEffect(() => {
+    if (!s) return;
 
-  s.on('online', (userId) => {
-  console.log(`${userId} is now online`);
+    const handleTyping = ({ fromUserId }) => {
+      if (fromUserId === selectedUser?._id) setIsTyping(true);
+      else setIsTyping(false);
+    };
 
-  if(userId==selectedUser?._id) setSelectedUser({...selectedUser,isActive:true})
-  
-  
-});
+    const handleStopTyping = () => setIsTyping(false);
 
- s.on('offline', ({userId,lastActive}) => {
-  console.log(`${userId} is now offline`);
-  if(userId==selectedUser?._id) setSelectedUser({...selectedUser,isActive:false,lastActive:lastActive})
-});
+    s.on('typing', handleTyping);
+    s.on('stop_typing', handleStopTyping);
 
-  return () => {
-    s.off('typing', handleTyping);
-    s.off('stop_typing', handleStopTyping);
-  };
-}, [selectedUser?._id]);
+    s.on('online', (userId) => {
+
+
+      if (userId == selectedUser?._id) {
+        console.log(chats)
+        setSelectedUser({ ...selectedUser, isActive: true })
+        setChats(prevChats => prevChats.map(chat => {
+          return { ...chat, isReceived: true };
+        }));
+
+      }
+
+
+    });
+
+    s.on('offline', ({ userId, lastActive }) => {
+      console.log(`${userId} is now offline`);
+      if (userId == selectedUser?._id) setSelectedUser({ ...selectedUser, isActive: false, lastActive: lastActive })
+    });
+
+    return () => {
+      s.off('typing', handleTyping);
+      s.off('stop_typing', handleStopTyping);
+    };
+  }, [selectedUser?._id]);
 
   const bottomRef = useRef(null);
 
@@ -255,7 +262,7 @@ useEffect(() => {
           <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center overflow-hidden">
             {selectedUser?.avatar ? (
               <img
-                src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${selectedUser.avatar}`}
+                src={`http://localhost:5000/${selectedUser.avatar}`}
                 alt="Profile"
                 className="h-full w-full object-cover"
               />
@@ -293,14 +300,14 @@ useEffect(() => {
               className={`flex ${chat.receiver_id === selectedUser._id ? 'justify-end' : 'justify-start'} mb-2`}
             >
               <div
-                className={`p-2 rounded-lg break-words whitespace-pre-wrap max-w-xs text-white ${chat.receiver_id === selectedUser._id ? 'bg-[#102d45]' : 'bg-[#371449]'
+                className={`p-2 rounded-lg break-words whitespace-pre-wrap min-w-[100px] max-w-xs text-white ${chat.receiver_id === selectedUser._id ? 'bg-[#102d45]' : 'bg-[#371449]'
                   }`}
                 style={{ wordBreak: 'break-word' }}
               >
                 <div>
 
                   {chat?.type == 'image' && (<div>
-                    <img src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa"
+                    <img src={`http://localhost:5000/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa"
                       onLoad={() => {
                         if (bottomRef.current) {
                           bottomRef.current.scrollIntoView({ behavior: 'auto' });
@@ -344,52 +351,57 @@ useEffect(() => {
                 <div className="flex justify-end items-center gap-1 text-xs text-gray-400 mt-1">
                   <span>{formatTime(chat.createdAt)}</span>
 
-                  {!chat.isViewed ? (<svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-green-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M7 13l3 3L20 6"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 13l3 3"
-                    />
-                  </svg>) : !chat.isReceived ? (<svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M7 13l3 3L20 6"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 13l3 3"
-                    />
-                  </svg>) : (<svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>)}
+                  {chat.receiver_id == selectedUser._id && <>
+
+                    {chat.isViewed ? (<svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-green-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M7 13l3 3L20 6"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 13l3 3"
+                      />
+                    </svg>) : chat.isReceived ? (<svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M7 13l3 3L20 6"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 13l3 3"
+                      />
+                    </svg>) : (<svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>)}
+                  </>}
+
+
 
                 </div>
               </div>
@@ -417,7 +429,7 @@ useEffect(() => {
             e.preventDefault();
             sendMessage();
           }}>
-       
+
             <div className='flex items-center gap-3'>
               <button
                 type="button" onClick={() => setShowPicker(!showPicker)}

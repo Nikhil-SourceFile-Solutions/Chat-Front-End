@@ -6,7 +6,7 @@ let socket = null;
 export const connectSocket = (userId) => {
   if (socket) socket.disconnect();  // Disconnect existing socket if any
 
-  socket = io('http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io', {
+  socket = io('http://localhost:5000', {
     transports: ['websocket'],
     auth: { userId },
   });
