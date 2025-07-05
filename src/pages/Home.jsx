@@ -94,6 +94,8 @@ export default function Home() {
     const handleReceiveMessage = (message) => {
       const sound = new Audio('/assets/incoming.mp3');
       sound.play().catch(err => console.warn('Audio blocked:', err));
+
+      if(message.sender_id != selectedUser?._id)fetchData()
     }
     s.on('typing', handleTyping);
     s.on('stop_typing', handleStopTyping);
