@@ -34,7 +34,16 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
       });
 
       if (response.data.status == "success") {
-        setSelectedUser(response.data.user)
+
+         setUsers(prevUsers =>
+        prevUsers.map(user =>
+          user._id == response.data.user._id
+            ? { ...response.data.user, unreadCount: 0,lastMessage:user.lastMessage }
+            : user
+        )
+      );
+
+
 
         setChats(response.data.chats)
       }
