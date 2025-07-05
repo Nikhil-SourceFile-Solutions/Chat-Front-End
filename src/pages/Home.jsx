@@ -12,7 +12,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { NavLink, useNavigate } from 'react-router-dom'
-import socket,{disconnectSocket,connectSocket} from '../socket';
+import socket, { disconnectSocket, connectSocket } from '../socket';
 import axios from 'axios'
 import { UserList } from './UserList'
 import MessageBox from './MessageBox'
@@ -74,16 +74,16 @@ export default function Home() {
 
 
   useEffect(() => {
-  const storedUser = localStorage.getItem('user');
-  if (storedUser) {
-    const userId = JSON.parse(storedUser)?._id;
-    if (userId) connectSocket(userId);  // ✅ connect after reload too
-  }
-}, []);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const userId = JSON.parse(storedUser)?._id;
+      if (userId) connectSocket(userId);  // ✅ connect after reload too
+    }
+  }, []);
 
   useEffect(() => {
     const s = socket();  // Get the current socket safely
-console.log("heeeeee")
+    console.log("heeeeee")
     if (!s) return;
 
     const handleTyping = ({ fromUserId }) => setTyping(fromUserId);
@@ -91,17 +91,22 @@ console.log("heeeeee")
     const handleApple = (data) => console.log("apple", data);
     const handleViewed = (data) => console.log("viewed-need to solve", data);
 
+    const handleReceiveMessage = (message) => {
+      const sound = new Audio('/assets/incoming.mp3');
+      sound.play().catch(err => console.warn('Audio blocked:', err));
+    }
     s.on('typing', handleTyping);
     s.on('stop_typing', handleStopTyping);
     s.on('apple', handleApple);
-s.on('viewed', handleViewed);
-    
+    s.on('viewed', handleViewed);
 
+    s.on('receive_message', handleReceiveMessage);
     return () => {
       s.off('typing', handleTyping);
       s.off('stop_typing', handleStopTyping);
       s.off('apple', handleApple);
-       s.off('viewed', handleViewed);
+      s.off('viewed', handleViewed);
+      s.off('receive_message', handleReceiveMessage);
     };
   }, []); // If needed, you can adjust dependencies
 
@@ -113,12 +118,12 @@ s.on('viewed', handleViewed);
   }, [selectedUser]);
 
 
-  
-  
-  
-    const [openModal, setOpenModal] = useState(false);
-  
-  
+
+
+
+  const [openModal, setOpenModal] = useState(false);
+
+
 
   return (
     <>
@@ -168,7 +173,7 @@ s.on('viewed', handleViewed);
               disconnectSocket();
               localStorage.removeItem('token');
               localStorage.removeItem('user');
-             
+
               navigate('/login')
             }} className="text-sm/6 font-semibold cursor-pointer bg-[#ff0000] px-3 rounded-lg me-4">
               Logout
@@ -247,7 +252,7 @@ s.on('viewed', handleViewed);
               <li
                 key={user._id}
                 className=" cursor-pointer hover:bg-gray-200"
-                onClick={() =>selectedUser?._id != user._id && setSelectedUser(user)}
+                onClick={() => selectedUser?._id != user._id && setSelectedUser(user)}
               >
                 {/* {user.name} */}
                 <UserList user={user} selectedUser={selectedUser} typing={typing} />

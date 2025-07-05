@@ -132,12 +132,11 @@ const [isLive,setIsLive]=useState(true);
     const handleReceiveMessage = (message) => {
       console.log("recived message",message)
     if(message.sender_id==selectedUser?._id){  setChats(prev => [...prev, message]);
-      
+    // sound moved to home
      s.emit('recived_live', message._id );
     }
 
-    const sound = new Audio('/assets/incoming.mp3');
-      sound.play().catch(err => console.warn('Audio blocked:', err));
+    
 
       setUsers(prevUsers =>
         prevUsers.map(user =>
