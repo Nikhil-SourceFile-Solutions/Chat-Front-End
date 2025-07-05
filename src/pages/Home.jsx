@@ -11,133 +11,110 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
-import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
 import { NavLink, useNavigate } from 'react-router-dom'
-import socket from '../socket';
+import socket,{disconnectSocket,connectSocket} from '../socket';
 import axios from 'axios'
-
-import Chat from './chat/Index'
 import { UserList } from './UserList'
 import MessageBox from './MessageBox'
 import NewChat from '../NewChat'
 import { User } from 'lucide-react'
 import ProfileModal from './ProfileModal'
+
+
 export default function Home() {
-
   const navigate = useNavigate();
-
   const token = localStorage.getItem('token');
-
-let authUser = localStorage.getItem('user');
-
-if (authUser) {
-  authUser = JSON.parse(authUser);
-}
-
-  useEffect(() => {
-    if (!token) navigate('/login')
-  }, [token])
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [typing, setTyping] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileModal, setProfileModal] = useState(false);
 
+  let authUser = localStorage.getItem('user');
+  if (authUser) authUser = JSON.parse(authUser);
 
+  // ⛔ Don't call socket() at top level → use inside useEffect or functions only
 
   useEffect(() => {
-  if (selectedUser) {
-    console.log("selectedUser", selectedUser);
-
-    const already = users.find((u) => u._id === selectedUser._id);
-
-    console.log("already", already);
-
-    if (!already) setUsers(prev => [...prev, selectedUser]);
-  }
-}, [selectedUser])
+    if (!token) navigate('/login');
+  }, [token, navigate]);
 
   const fetchData = async () => {
-
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://localhost:5000/api/home-data',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/home-data',
         headers: {
           'Content-Type': 'application/json',
           Authorization: "Bearer " + token,
         },
       });
 
-      if (response.data.status == "success") setUsers(response.data.users)
-      console.log(response)
+      if (response.data.status === "success") setUsers(response.data.users);
     } catch (error) {
-     
-      if(error.response.status==401)navigate('/login');
+      if (error.response?.status === 401) navigate('/login');
     }
-  }
+  };
 
   useEffect(() => {
-    fetchData()
-  }, [])
-
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
-
-
-  const [openModal, setOpenModal] = useState(false);
-
-
-  const [filteredUsers, setFilteredUsers] = useState([]);
-
-  const [profileModal,setProfileModal]=useState(false)
-
-useEffect(() => {
-  if (users.length > 0) {
-    const sorted = [...users].sort((a, b) => {
-      const aTime = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
-      const bTime = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
-      return bTime - aTime; // latest first
-    });
-
-    setFilteredUsers(sorted);
-  }
-}, [users]);
-
-
-
-  const [typing, setTyping] = useState('');
-
-  useEffect(() => {
-    socket.on('typing', ({ toUserId,fromUserId }) => {
-      
-      
-      // console.log("toUserId",toUserId)
-     
-
-         console.log("fromUserId",fromUserId)
-
-         setTyping(fromUserId)
-
-      //       console.log("user?._id",user?._id)
-     
-
-      // if(fromUserId==user?._id)setIsTyping(true);
-      // else setIsTyping(false);
-   
-     
-    });
-
-    socket.on('stop_typing', ({toUserId,fromUserId }) => {
-      setTyping('');
-    });
-
-    return () => {
-      socket.off('typing');
-      socket.off('stop_typing');
-    };
+    fetchData();
   }, []);
 
-   socket.on('apple', (data) => {
-      console.log("apple",data)
-    });
+  useEffect(() => {
+    if (users.length > 0) {
+      const sorted = [...users].sort((a, b) => {
+        const aTime = new Date(a.lastMessage?.createdAt || 0).getTime();
+        const bTime = new Date(b.lastMessage?.createdAt || 0).getTime();
+        return bTime - aTime;
+      });
+      setFilteredUsers(sorted);
+    }
+  }, [users]);
+
+
+  useEffect(() => {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    const userId = JSON.parse(storedUser)?._id;
+    if (userId) connectSocket(userId);  // ✅ connect after reload too
+  }
+}, []);
+
+  useEffect(() => {
+    const s = socket();  // Get the current socket safely
+console.log("heeeeee")
+    if (!s) return;
+
+    const handleTyping = ({ fromUserId }) => setTyping(fromUserId);
+    const handleStopTyping = () => setTyping('');
+    const handleApple = (data) => console.log("apple", data);
+
+    s.on('typing', handleTyping);
+    s.on('stop_typing', handleStopTyping);
+    s.on('apple', handleApple);
+
+    return () => {
+      s.off('typing', handleTyping);
+      s.off('stop_typing', handleStopTyping);
+      s.off('apple', handleApple);
+    };
+  }, []); // If needed, you can adjust dependencies
+
+  useEffect(() => {
+    if (selectedUser) {
+      const already = users.find(u => u._id === selectedUser._id);
+      if (!already) setUsers(prev => [...prev, selectedUser]);
+    }
+  }, [selectedUser]);
+
+
+  
+  
+  
+    const [openModal, setOpenModal] = useState(false);
+  
+  
 
   return (
     <>
@@ -177,14 +154,17 @@ useEffect(() => {
               type="button"
               className="flex items-center cursor-pointer gap-x-2 text-sm font-semibold bg-[#371449] text-white px-3 py-2 rounded-lg me-4"
 
-              onClick={()=>setProfileModal(!profileModal)}
+              onClick={() => setProfileModal(!profileModal)}
             >
               <User className="w-4 h-4" />
               {authUser?.name}
             </button>
 
             <button type='button' onClick={() => {
-              localStorage.removeItem("token");
+              disconnectSocket();
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+             
               navigate('/login')
             }} className="text-sm/6 font-semibold cursor-pointer bg-[#ff0000] px-3 rounded-lg me-4">
               Logout
@@ -266,7 +246,7 @@ useEffect(() => {
                 onClick={() => setSelectedUser(user)}
               >
                 {/* {user.name} */}
-                <UserList user={user} selectedUser={selectedUser} typing={typing}/>
+                <UserList user={user} selectedUser={selectedUser} typing={typing} />
               </li>
             ))}
           </ul>
@@ -280,7 +260,7 @@ useEffect(() => {
             }`}
         >
           {selectedUser ? (
-            <MessageBox selectedUser={selectedUser} setSelectedUser={setSelectedUser} setUsers={setUsers}/>
+            <MessageBox selectedUser={selectedUser} setSelectedUser={setSelectedUser} setUsers={setUsers} />
           ) : (
             <div className="h-full flex items-center justify-center text-gray-400">
               Select a chat to start messaging
@@ -292,7 +272,7 @@ useEffect(() => {
 
       <NewChat isOpen={openModal} onClose={setOpenModal} setSelectedUser={setSelectedUser} />
 
-      <ProfileModal isOpen={profileModal} onClose={setProfileModal}/>
+      <ProfileModal isOpen={profileModal} onClose={setProfileModal} />
     </>
   )
 }

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-
+import { connectSocket } from '../../socket';
 const Login = () => {
   const navigate = useNavigate();
   const [defaultParams] = useState({
@@ -29,7 +29,7 @@ const Login = () => {
     try {
       const response = await axios({
         method: 'post',
-        url: 'http://localhost:5000/api/auth/login',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/auth/login',
         data,
         headers: {
           'Content-Type': 'application/json',
@@ -40,7 +40,10 @@ const Login = () => {
       console.log(response)
       if (response.data.status == "success") {
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', response.data.user);
+        const user=response.data.user;
+        localStorage.setItem('user', user);
+        const id=JSON.parse(user)._id
+        connectSocket(id);
         navigate('/')
       }
 

@@ -25,7 +25,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://localhost:5000/api/chat-data',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/chat-data',
         params: { _id: selectedUser?._id },
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
       formData.append('file', selectedFile);
       const response = await axios({
         method: 'post',
-        url: 'http://localhost:5000/api/messages',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/messages',
         data: formData,
         headers: {
           // 'Content-Type': 'application/json',
@@ -104,72 +104,83 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
 
 
 
-  useEffect(() => {
+const s = socket();  // Declare once
 
-    socket.on('receive_message', (message) => {
+useEffect(() => {
+  if (!s) return;
 
-      setChats((prevChats) => [...prevChats, message]);
+  const handleReceiveMessage = (message) => {
+    setChats(prev => [...prev, message]);
+    const sound = new Audio('/assets/incoming.mp3');
+    sound.play().catch(err => console.warn('Audio blocked:', err));
 
-      const sound = new Audio('/assets/incoming.mp3');
-      sound.play().catch((error) => {
-        console.warn('Audio autoplay blocked:', error);
-      });
-
-      setUsers(prevUsers =>
-        prevUsers.map(user =>
-          user._id === selectedUser._id
-            ? { ...user, lastMessage: message }
-            : user
-        ))
-
-    });
-
-
-
-    return () => {
-      socket.off('receive_message');
-    };
-  }, []);
-
-
-  const typingTimeoutRef = useRef(null);
-
-  const handleTyping = (e) => {
-    const newMessage = e.target.value;
-    setMessage(newMessage);
-    socket.emit('typing', { toUserId: selectedUser?._id, fromUserId: authUser?._id });
-    clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(() => {
-      socket.emit('stop_typing', { toUserId: selectedUser?._id, fromUserId: authUser?._id });
-    }, 500);
+    setUsers(prevUsers =>
+      prevUsers.map(user =>
+        user._id === selectedUser?._id
+          ? { ...user, lastMessage: message }
+          : user
+      )
+    );
   };
 
+  s.on('receive_message', handleReceiveMessage);
 
-  const [isTyping, setIsTyping] = useState(false);
+  return () => {
+    s.off('receive_message', handleReceiveMessage);
+  };
+}, []);
 
-  useEffect(() => {
-    socket.on('typing', ({ toUserId, fromUserId }) => {
+const typingTimeoutRef = useRef(null);
 
-      console.log("toUserId", toUserId)
-      console.log("authUserId", authUser?._id)
+const handleTyping = (e) => {
+  const newMessage = e.target.value;
+  setMessage(newMessage);
 
-      console.log("fromUserId", fromUserId)
-      console.log("selectedUserId", selectedUser._id)
+  if (s && selectedUser?._id && authUser?._id) {
+    s.emit('typing', { toUserId: selectedUser._id, fromUserId: authUser._id });
+  }
 
-      if (fromUserId == selectedUser._id) setIsTyping(true);
-      else setIsTyping(false);
+  clearTimeout(typingTimeoutRef.current);
+  typingTimeoutRef.current = setTimeout(() => {
+    if (s && selectedUser?._id && authUser?._id) {
+      s.emit('stop_typing', { toUserId: selectedUser._id, fromUserId: authUser._id });
+    }
+  }, 500);
+};
 
-    });
+const [isTyping,setIsTyping]=useState(false)
 
-    socket.on('stop_typing', ({ toUserId, fromUserId }) => {
-      setIsTyping(false);
-    });
+useEffect(() => {
+  if (!s) return;
 
-    return () => {
-      socket.off('typing');
-      socket.off('stop_typing');
-    };
-  }, [selectedUser._id]);
+  const handleTyping = ({ fromUserId }) => {
+    if (fromUserId === selectedUser?._id) setIsTyping(true);
+    else setIsTyping(false);
+  };
+
+  const handleStopTyping = () => setIsTyping(false);
+
+  s.on('typing', handleTyping);
+  s.on('stop_typing', handleStopTyping);
+
+  s.on('online', (userId) => {
+  console.log(`${userId} is now online`);
+
+  if(userId==selectedUser?._id) setSelectedUser({...selectedUser,isActive:true})
+  
+  
+});
+
+ s.on('offline', ({userId,lastActive}) => {
+  console.log(`${userId} is now offline`);
+  if(userId==selectedUser?._id) setSelectedUser({...selectedUser,isActive:false,lastActive:lastActive})
+});
+
+  return () => {
+    s.off('typing', handleTyping);
+    s.off('stop_typing', handleStopTyping);
+  };
+}, [selectedUser?._id]);
 
   const bottomRef = useRef(null);
 
@@ -244,7 +255,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
           <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center overflow-hidden">
             {selectedUser?.avatar ? (
               <img
-                src={`http://localhost:5000/${selectedUser.avatar}`}
+                src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${selectedUser.avatar}`}
                 alt="Profile"
                 className="h-full w-full object-cover"
               />
@@ -289,7 +300,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
                 <div>
 
                   {chat?.type == 'image' && (<div>
-                    <img src={`http://localhost:5000/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa"
+                    <img src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa"
                       onLoad={() => {
                         if (bottomRef.current) {
                           bottomRef.current.scrollIntoView({ behavior: 'auto' });

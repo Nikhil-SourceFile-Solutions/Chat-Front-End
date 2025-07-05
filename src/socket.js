@@ -1,31 +1,32 @@
-
+// socket.js
 import { io } from 'socket.io-client';
 
+let socket = null;
 
-let userId = null;
-const storedUser = localStorage.getItem('user');
+export const connectSocket = (userId) => {
+  if (socket) socket.disconnect();  // Disconnect existing socket if any
 
-console.log("storedUser",storedUser)
-if (storedUser) {
-  try {
-    const parsed = JSON.parse(storedUser);
-    
-console.log("storedUser",parsed._id)
-    userId = parsed._id;
-  } catch (err) {
-    console.error("Error parsing user from localStorage", err);
+  socket = io('http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io', {
+    transports: ['websocket'],
+    auth: { userId },
+  });
+
+  socket.on('connect', () => {
+    console.log('✅ Socket connected:', socket.id, 'for user:', userId);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('❌ Socket disconnected');
+  });
+};
+
+export const disconnectSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
   }
-}
+};
 
-const socket = io('http://localhost:5000', {
-  transports: ['websocket'],
-  auth: {
-    userId,
-  },
-});
+export const getSocket = () => socket;
 
-socket.on('connect', () => {
-  console.log('Socket connected as:', userId, '->', socket.id);
-});
-
-export default socket;
+export default getSocket;
