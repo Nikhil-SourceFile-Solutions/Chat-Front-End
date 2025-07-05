@@ -48,13 +48,13 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
   }
 
   useEffect(() => {
-
     if (selectedUser?._id) fetchChat()
   }, [selectedUser?._id])
 
   const [message, setMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [type, setType] = useState('text');
+
   const sendMessage = async () => {
     console.log(message)
     if (type == "text" && !message) return;
@@ -89,7 +89,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
             user._id === selectedUser._id
               ? { ...user, lastMessage: response.data.chat }
               : user
-          ))
+        ))
 
         setMessage('')
         fetchChat()
@@ -102,6 +102,26 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
     }
   };
 
+const [isLive,setIsLive]=useState(true);
+    useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('🟢 User is back on this tab');
+       fetchChat() 
+        setIsLive(true)
+      } else {
+        console.log('🔴 User left the tab or minimized');
+        // socket.emit('user_away', { userId }); 
+        setIsLive(false)
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
 
   const s = socket();  // Declare once
@@ -110,13 +130,18 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
     if (!s) return;
 
     const handleReceiveMessage = (message) => {
-      setChats(prev => [...prev, message]);
+      console.log("recived message",message)
+    if(message.sender_id==selectedUser?._id){  setChats(prev => [...prev, message]);
       const sound = new Audio('/assets/incoming.mp3');
       sound.play().catch(err => console.warn('Audio blocked:', err));
+     s.emit('recived_live', message._id );
+    }
+
+    
 
       setUsers(prevUsers =>
         prevUsers.map(user =>
-          user._id === selectedUser?._id
+          user._id == message.sender_id
             ? { ...user, lastMessage: message }
             : user
         )
@@ -160,28 +185,41 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
 
     const handleStopTyping = () => setIsTyping(false);
 
+    const handleViewed = (data) => {
+      if (data == selectedUser._id) setChats(prevChats => prevChats.map(chat => {
+        return { ...chat, isReceived: true, isViewed: true };
+      }));
+    };
+
+     const messageViewed = (data) => {
+
+      console.log('message viewed',data)
+      // if (data == selectedUser._id) setChats(prevChats => prevChats.map(chat => {
+      //   return { ...chat, isReceived: true, isViewed: true };
+      // }));
+    };
+
     s.on('typing', handleTyping);
     s.on('stop_typing', handleStopTyping);
 
+  s.on('message_viewed', messageViewed);
+    
     s.on('online', (userId) => {
-
-
       if (userId == selectedUser?._id) {
         console.log(chats)
         setSelectedUser({ ...selectedUser, isActive: true })
         setChats(prevChats => prevChats.map(chat => {
           return { ...chat, isReceived: true };
         }));
-
       }
-
-
     });
 
     s.on('offline', ({ userId, lastActive }) => {
       console.log(`${userId} is now offline`);
       if (userId == selectedUser?._id) setSelectedUser({ ...selectedUser, isActive: false, lastActive: lastActive })
     });
+
+    s.on('viewed', handleViewed);
 
     return () => {
       s.off('typing', handleTyping);
@@ -236,6 +274,17 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
     const gb = mb / 1024;
     return `${gb.toFixed(1)} GB`;
   };
+
+
+
+
+
+
+
+
+
+
+
   return (
     <div className="flex flex-col h-full">
       {/* Mobile Only Back Button */}

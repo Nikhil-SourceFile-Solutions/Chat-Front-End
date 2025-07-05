@@ -89,15 +89,19 @@ console.log("heeeeee")
     const handleTyping = ({ fromUserId }) => setTyping(fromUserId);
     const handleStopTyping = () => setTyping('');
     const handleApple = (data) => console.log("apple", data);
+    const handleViewed = (data) => console.log("viewed-need to solve", data);
 
     s.on('typing', handleTyping);
     s.on('stop_typing', handleStopTyping);
     s.on('apple', handleApple);
+s.on('viewed', handleViewed);
+    
 
     return () => {
       s.off('typing', handleTyping);
       s.off('stop_typing', handleStopTyping);
       s.off('apple', handleApple);
+       s.off('viewed', handleViewed);
     };
   }, []); // If needed, you can adjust dependencies
 
@@ -243,7 +247,7 @@ console.log("heeeeee")
               <li
                 key={user._id}
                 className=" cursor-pointer hover:bg-gray-200"
-                onClick={() => setSelectedUser(user)}
+                onClick={() =>selectedUser?._id != user._id && setSelectedUser(user)}
               >
                 {/* {user.name} */}
                 <UserList user={user} selectedUser={selectedUser} typing={typing} />
