@@ -25,7 +25,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/chat-data',
+        url: 'http://localhost:5000/api/chat-data',
         params: { _id: selectedUser?._id },
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
       formData.append('file', selectedFile);
       const response = await axios({
         method: 'post',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/messages',
+        url: 'http://localhost:5000/api/messages',
         data: formData,
         headers: {
           // 'Content-Type': 'application/json',
@@ -319,7 +319,7 @@ const [isLive,setIsLive]=useState(true);
           <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center overflow-hidden">
             {selectedUser?.avatar ? (
               <img
-                src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${selectedUser.avatar}`}
+                src={`http://localhost:5000/${selectedUser.avatar}`}
                 alt="Profile"
                 className="h-full w-full object-cover"
               />
@@ -364,7 +364,7 @@ const [isLive,setIsLive]=useState(true);
                 <div>
 
                   {chat?.type == 'image' && (<div>
-                    <img src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa"
+                    <img src={`http://localhost:5000/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa"
                       onLoad={() => {
                         if (bottomRef.current) {
                           bottomRef.current.scrollIntoView({ behavior: 'auto' });
