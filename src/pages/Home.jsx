@@ -237,7 +237,7 @@ export default function Home() {
       </header>
 
 
-      <div className="h-[80vh] text-white bg-[#1a0529] w-full flex flex-col md:flex-row ">
+      <div className=" text-white bg-[#1a0529] w-full flex flex-col md:flex-row " style={{ height: 'calc(100vh - 5.5rem)' }}>
         {/* Sidebar - Chat List */}
         <div
           className={`  md:w-[350px] w-full md:block  border-r border-[#000000] ${selectedUser ? 'hidden md:block' : 'block'
