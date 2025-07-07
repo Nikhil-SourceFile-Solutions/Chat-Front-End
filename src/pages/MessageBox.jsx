@@ -1,9 +1,10 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
 import socket from '../socket';
-import { Paperclip, SmilePlus, User, Users } from 'lucide-react';
+import { Download, Paperclip, SmilePlus, User, Users } from 'lucide-react';
 import Picker from '@emoji-mart/react';
 import AttachmentMenu from './AttachmentMenu';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
 
 export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) {
 
@@ -25,7 +26,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://localhost:5000/api/chat-data',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/chat-data',
         params: { _id: selectedUser?._id },
         headers: {
           'Content-Type': 'application/json',
@@ -46,6 +47,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
 
 
         setChats(response.data.chats)
+        setSelectedUser(response.data.user)
       }
     } catch (error) {
       console.log(error)
@@ -78,7 +80,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
       formData.append('file', selectedFile);
       const response = await axios({
         method: 'post',
-        url: 'http://localhost:5000/api/messages',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/messages',
         data: formData,
         headers: {
           // 'Content-Type': 'application/json',
@@ -224,7 +226,7 @@ const [isLive,setIsLive]=useState(true);
 
     s.on('offline', ({ userId, lastActive }) => {
       console.log(`${userId} is now offline`);
-      if (userId == selectedUser?._id) setSelectedUser({ ...selectedUser, isActive: false, lastActive: lastActive })
+      if (userId == selectedUser?._id) setSelectedUser({ ...selectedUser, isActive: false, lastActive: lastActive,lastActiveReadable:'just now' })
     });
 
     s.on('viewed', handleViewed);
@@ -286,9 +288,24 @@ const [isLive,setIsLive]=useState(true);
 
 
 
+  const downloadImage = async (imageUrl,name) => {
+    try {
+      const response = await fetch(imageUrl, { mode: 'cors' });
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
 
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
 
 
 
@@ -319,10 +336,11 @@ const [isLive,setIsLive]=useState(true);
           <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center overflow-hidden">
             {selectedUser?.avatar ? (
               <img
-                src={`http://localhost:5000/${selectedUser.avatar}`}
+                src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${selectedUser.avatar}`}
                 alt="Profile"
                 className="h-full w-full object-cover"
               />
+              
             ) : (
               <User className="h-5 w-5 text-white opacity-70" />
             )}
@@ -364,13 +382,25 @@ const [isLive,setIsLive]=useState(true);
                 <div>
 
                   {chat?.type == 'image' && (<div>
-                    <img src={`http://localhost:5000/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa"
+
+                     <PhotoProvider>
+     
+      
+          <PhotoView  src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`}>
+          <img src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa"
                       onLoad={() => {
                         if (bottomRef.current) {
                           bottomRef.current.scrollIntoView({ behavior: 'auto' });
                         }
                       }}
                     />
+          </PhotoView>
+       
+     
+    </PhotoProvider>
+
+  
+                    
                   </div>
                   )}
 
@@ -404,8 +434,15 @@ const [isLive,setIsLive]=useState(true);
 
                 </div>
 
-                {/* Footer row for time + tick */}
-                <div className="flex justify-end items-center gap-1 text-xs text-gray-400 mt-1">
+         
+
+                <div className={`${chat?.data?.filePath?'flex justify-between':''} `}>
+
+                  {chat?.data?.filePath !='uploads/null' && (<button onClick={()=>downloadImage(`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`,chat?.data?.filePath)}>
+                      <Download />
+                    </button>) }
+                    
+                    <div className="flex justify-end items-center gap-1 text-xs text-gray-400 mt-1">
                   <span>{formatTime(chat.createdAt)}</span>
 
                   {chat.receiver_id == selectedUser._id && <>
@@ -461,6 +498,8 @@ const [isLive,setIsLive]=useState(true);
 
 
                 </div>
+                </div>
+                
               </div>
             </div>
 

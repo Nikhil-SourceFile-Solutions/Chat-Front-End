@@ -44,7 +44,7 @@ export default function Home() {
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://localhost:5000/api/home-data',
+        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/home-data',
         headers: {
           'Content-Type': 'application/json',
           Authorization: "Bearer " + token,
@@ -94,7 +94,6 @@ export default function Home() {
     const handleReceiveMessage = (message) => {
       const sound = new Audio('/assets/incoming.mp3');
       sound.play().catch(err => console.warn('Audio blocked:', err));
-
       if(message.sender_id != selectedUser?._id)fetchData()
     }
     s.on('typing', handleTyping);
@@ -175,7 +174,6 @@ export default function Home() {
               disconnectSocket();
               localStorage.removeItem('token');
               localStorage.removeItem('user');
-
               navigate('/login')
             }} className="text-sm/6 font-semibold cursor-pointer bg-[#ff0000] px-3 rounded-lg me-4">
               Logout
@@ -254,7 +252,7 @@ export default function Home() {
               <li
                 key={user._id}
                 className=" cursor-pointer hover:bg-gray-200"
-                onClick={() => selectedUser?._id != user._id && setSelectedUser(user)}
+                onClick={() => selectedUser?._id != user._id && setSelectedUser({_id:user._id,name:user.name,avatar:user._avatar,lastActiveReadable:'...'})}
               >
                 {/* {user.name} */}
                 <UserList user={user} selectedUser={selectedUser} typing={typing} />
