@@ -40,30 +40,21 @@ export default function Home() {
     if (!token) navigate('/login');
   }, [token, navigate]);
 
-  useEffect(() => {
-  const handleMessage = (event) => {
-    if (event.data?.domain) {
-      console.log("Parent Domain:", event.data.domain);
-      // Example: Use this domain in API headers
-    }
-  };
 
-  window.addEventListener('message', handleMessage);
-
-  return () => {
-    window.removeEventListener('message', handleMessage);
-  };
-}, []);
 
   const fetchData = async () => {
     try {
+
+      const query = new URLSearchParams(window.location.search);
+  const crm = query.get('crm');
+
       const response = await axios({
         method: 'get',
         url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/home-data',
         headers: {
           'Content-Type': 'application/json',
           Authorization: "Bearer " + token,
-          'crm': window.location.origin
+          'crm':crm
         },
       });
 
