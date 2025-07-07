@@ -40,6 +40,21 @@ export default function Home() {
     if (!token) navigate('/login');
   }, [token, navigate]);
 
+  useEffect(() => {
+  const handleMessage = (event) => {
+    if (event.data?.domain) {
+      console.log("Parent Domain:", event.data.domain);
+      // Example: Use this domain in API headers
+    }
+  };
+
+  window.addEventListener('message', handleMessage);
+
+  return () => {
+    window.removeEventListener('message', handleMessage);
+  };
+}, []);
+
   const fetchData = async () => {
     try {
       const response = await axios({
