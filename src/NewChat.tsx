@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Search, User, Users, UserX } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-const NewChat = ({ isOpen, onClose,setSelectedUser }) => {
+const NewChat = ({ isOpen, onClose,setSelectedUser,crm }) => {
   if (!isOpen) return null;
 
   const [users, setUsers] = useState([]);
@@ -21,6 +21,7 @@ const NewChat = ({ isOpen, onClose,setSelectedUser }) => {
               headers: {
                 'Content-Type': 'application/json',
                 Authorization: "Bearer " + token,
+                'crm':crm
               },
             });
 

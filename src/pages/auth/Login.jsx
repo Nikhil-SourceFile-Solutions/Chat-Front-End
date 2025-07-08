@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { connectSocket } from '../../socket';
 const Login = () => {
+
+  console.log("location.origin",location)
   const navigate = useNavigate();
   const [defaultParams] = useState({
     email: '',

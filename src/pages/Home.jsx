@@ -34,19 +34,19 @@ export default function Home() {
   let authUser = localStorage.getItem('user');
   if (authUser) authUser = JSON.parse(authUser);
 
-  // ⛔ Don't call socket() at top level → use inside useEffect or functions only
+  // Don't call socket() at top level → use inside useEffect or functions only 
 
   useEffect(() => {
     if (!token) navigate('/login');
   }, [token, navigate]);
 
-
+  const query = new URLSearchParams(window.location.search);
+  const crm = query.get('crm');
 
   const fetchData = async () => {
     try {
 
-      const query = new URLSearchParams(window.location.search);
-  const crm = query.get('crm');
+    
 
       const response = await axios({
         method: 'get',
@@ -286,7 +286,7 @@ export default function Home() {
       </div>
 
 
-      <NewChat isOpen={openModal} onClose={setOpenModal} setSelectedUser={setSelectedUser} />
+      <NewChat isOpen={openModal} onClose={setOpenModal} setSelectedUser={setSelectedUser} crm={crm}/>
 
       <ProfileModal isOpen={profileModal} onClose={setProfileModal} />
     </>
