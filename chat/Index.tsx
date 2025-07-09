@@ -14,7 +14,7 @@ export default function Index({ user, setUser }) {
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/chat-data',
+        url: 'http://api.sourcefile.online/api/chat-data',
         params: { _id: user?._id },
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export default function Index({ user, setUser }) {
     try {
       const response = await axios({
         method: 'post',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/messages',
+        url: 'http://api.sourcefile.online/api/messages',
         data: {
           receiver_id: user._id,
           message: message,

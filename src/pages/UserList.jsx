@@ -17,7 +17,7 @@ export const UserList = ({ user, selectedUser, typing }) => {
   const storedUser = localStorage.getItem('user');
   const authUser = storedUser ? JSON.parse(storedUser)?._id : null;
 
-  console.log("authUser", authUser)
+  // console.log("authUser", authUser)
 
 
 
@@ -44,7 +44,7 @@ export const UserList = ({ user, selectedUser, typing }) => {
         <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center overflow-hidden">
           {user?.avatar ? (
             <img
-              src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${user.avatar}`}
+              src={`http://api.sourcefile.online/${user.avatar}`}
               alt="Profile"
               className="h-full w-full object-cover"
             />

@@ -26,7 +26,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
     try {
       const response = await axios({
         method: 'get',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/chat-data',
+        url: 'http://api.sourcefile.online/api/chat-data',
         params: { _id: selectedUser?._id },
         headers: {
           'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ export default function MessageBox({ selectedUser, setSelectedUser, setUsers }) 
       formData.append('file', selectedFile);
       const response = await axios({
         method: 'post',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/messages',
+        url: 'http://api.sourcefile.online/api/messages',
         data: formData,
         headers: {
           // 'Content-Type': 'application/json',
@@ -135,13 +135,14 @@ const [isLive,setIsLive]=useState(true);
   }, []);
 
 
+
   const s = socket();  // Declare once
 
   useEffect(() => {
     if (!s) return;
 
     const handleReceiveMessage = (message) => {
-      console.log("recived message",message)
+      console.log("recived message in chat box",message)
     if(message.sender_id==selectedUser?._id){  setChats(prev => [...prev, message]);
     // sound moved to home
      s.emit('recived_live', message._id );
@@ -336,7 +337,7 @@ const [isLive,setIsLive]=useState(true);
           <div className="bg-gray-600 rounded-full h-10 w-10 flex items-center justify-center overflow-hidden">
             {selectedUser?.avatar ? (
               <img
-                src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${selectedUser.avatar}`}
+                src={`http://api.sourcefile.online/${selectedUser.avatar}`}
                 alt="Profile"
                 className="h-full w-full object-cover"
               />
@@ -386,8 +387,8 @@ const [isLive,setIsLive]=useState(true);
                      <PhotoProvider>
      
       
-          <PhotoView  src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`}>
-          <img src={`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa"
+          <PhotoView  src={`http://api.sourcefile.online/${chat?.data?.filePath}`}>
+          <img src={`http://api.sourcefile.online/${chat?.data?.filePath}`} className='rounded mb-2' alt="aaa"
                       onLoad={() => {
                         if (bottomRef.current) {
                           bottomRef.current.scrollIntoView({ behavior: 'auto' });
@@ -438,7 +439,7 @@ const [isLive,setIsLive]=useState(true);
 
                 <div className={`${chat?.data?.filePath?'flex justify-between':''} `}>
 
-                  {chat?.data?.filePath !='uploads/null' && (<button onClick={()=>downloadImage(`http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/${chat?.data?.filePath}`,chat?.data?.filePath)}>
+                  {chat?.data?.filePath !='uploads/null' && (<button onClick={()=>downloadImage(`http://api.sourcefile.online/${chat?.data?.filePath}`,chat?.data?.filePath)}>
                       <Download />
                     </button>) }
                     

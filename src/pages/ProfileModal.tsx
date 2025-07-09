@@ -21,7 +21,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
 
-  const [profileImage, setProfileImage] = useState(user?.avatar ? 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/' + user.avatar : '/assets/user.png');
+  const [profileImage, setProfileImage] = useState(user?.avatar ? 'http://api.sourcefile.online/' + user.avatar : '/assets/user.png');
   const [selectedImageFile, setSelectedImageFile] = useState(null);  // Store actual file
 
   const fileInputRef = useRef();
@@ -59,7 +59,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
   const AddOrUpdateApi = async (data) => {
     setIsBtnLoading(true);
     try {
-      const response = await axios.post('http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/update-profile', data, {
+      const response = await axios.post('http://api.sourcefile.online/api/update-profile', data, {
         headers: {   Authorization: "Bearer " + token, }
       });
 

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-     "build": "vite build && cp public/widget.js dist/widget.js",
+    "build": "vite build && cp public/widget.js dist/widget.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -31,42 +31,78 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileModal, setProfileModal] = useState(false);
 
+
+
+ useEffect(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const subdomain = urlParams.get('subdomain');
+  const crmToken = urlParams.get('crmToken');
+  const user_id = urlParams.get('user_id');
+
+  const newCrmData = {
+    subdomain: subdomain || null,
+    crmToken: crmToken || null,
+    user_id: user_id || null,
+    loaded: 1
+  };
+
+
+
+  localStorage.setItem('chatbox_subdomain', newCrmData.subdomain);
+  localStorage.setItem('chatbox_crmToken', newCrmData.crmToken);
+  localStorage.setItem('chatbox_user_id', newCrmData.user_id);
+  localStorage.setItem('chatbox_loaded', '1');
+fetchData()
+}, []);
+
+  
+
   let authUser = localStorage.getItem('user');
   if (authUser) authUser = JSON.parse(authUser);
 
-  // Don't call socket() at top level → use inside useEffect or functions only 
 
-  useEffect(() => {
-    if (!token) navigate('/login');
-  }, [token, navigate]);
-
-  const query = new URLSearchParams(window.location.search);
-  const crm = query.get('crm');
 
   const fetchData = async () => {
     try {
 
-    
+
 
       const response = await axios({
         method: 'get',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/home-data',
+        url: 'http://api.sourcefile.online/api/home-data',
         headers: {
           'Content-Type': 'application/json',
           Authorization: "Bearer " + token,
-          'crm':crm
+          crm:localStorage.getItem('chatbox_subdomain')
         },
       });
 
-      if (response.data.status === "success") setUsers(response.data.users);
+      if (response.data.status === "success"){
+        
+      
+        setUsers(response.data.users);}
     } catch (error) {
-      if (error.response?.status === 401) navigate('/login');
+    console.log(error)
+      if (error.response?.status === 401) {
+          
+        handleCRMlogin();
+     
+      }
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+
+
+
+  const handleCRMlogin = async () => {
+    navigate('/login', { state: {
+      subdomain: localStorage.getItem('chatbox_subdomain'),
+      crmToken: localStorage.getItem('chatbox_crmToken'),
+      user_id: localStorage.getItem('chatbox_user_id'),
+      loaded:1
+    } });
+
+  }
 
   useEffect(() => {
     if (users.length > 0) {
@@ -101,7 +137,7 @@ export default function Home() {
     const handleReceiveMessage = (message) => {
       const sound = new Audio('/assets/incoming.mp3');
       sound.play().catch(err => console.warn('Audio blocked:', err));
-      if(message.sender_id != selectedUser?._id)fetchData()
+      if (message.sender_id != selectedUser?._id) fetchData()
     }
     s.on('typing', handleTyping);
     s.on('stop_typing', handleStopTyping);
@@ -259,7 +295,7 @@ export default function Home() {
               <li
                 key={user._id}
                 className=" cursor-pointer hover:bg-gray-200"
-                onClick={() => selectedUser?._id != user._id && setSelectedUser({_id:user._id,name:user.name,avatar:user._avatar,lastActiveReadable:'...'})}
+                onClick={() => selectedUser?._id != user._id && setSelectedUser({ _id: user._id, name: user.name, avatar: user._avatar, lastActiveReadable: '...' })}
               >
                 {/* {user.name} */}
                 <UserList user={user} selectedUser={selectedUser} typing={typing} />
@@ -286,7 +322,7 @@ export default function Home() {
       </div>
 
 
-      <NewChat isOpen={openModal} onClose={setOpenModal} setSelectedUser={setSelectedUser} crm={crm}/>
+     {openModal && <NewChat isOpen={openModal} onClose={setOpenModal} setSelectedUser={setSelectedUser} />} 
 
       <ProfileModal isOpen={profileModal} onClose={setProfileModal} />
     </>

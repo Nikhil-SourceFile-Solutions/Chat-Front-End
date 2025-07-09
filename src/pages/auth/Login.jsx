@@ -1,10 +1,16 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { connectSocket } from '../../socket';
+import CrmLogin from './CrmLogin';
 const Login = () => {
 
-  console.log("location.origin",location)
+
+  const location = useLocation();
+  const crmData= location.state || {};
+
+  console.log("crmData",crmData)
+
   const navigate = useNavigate();
   const [defaultParams] = useState({
     email: '',
@@ -31,7 +37,7 @@ const Login = () => {
     try {
       const response = await axios({
         method: 'post',
-        url: 'http://xkoggsw080g8so0og4kco4g4.31.97.61.92.sslip.io/api/auth/login',
+        url: 'http://api.sourcefile.online/api/auth/login',
         data,
         headers: {
           'Content-Type': 'application/json',
@@ -49,18 +55,10 @@ const Login = () => {
         navigate('/')
       }
 
-      // } else if (response.data.status == "error") {
-      //     toast.fire({
-      //         icon: 'error',
-      //         title: response.data.message,
-      //         padding: '10px 20px',
-      //         background: '#f44336',
-      //         color: 'white',
-      //     });
-      // }
+   
 
     } catch (error) {
-      if (error?.response?.status == 401) logout()
+      
 
       if (error?.response?.status === 422) {
         const serveErrors = error.response.data.errors;
@@ -89,7 +87,9 @@ const Login = () => {
     AddOrUpdateApi(data);
   };
 
-  return (
+
+  return crmData?.crmToken?<CrmLogin crmData={crmData}/>:
+  (
     <div className="flex items-center justify-center min-h-screen bg-[#020621]">
       <div className="w-full m-4 max-w-md p-8 space-y-6 bg-[#371449] rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-white">Login</h2>
